@@ -2,6 +2,7 @@ import axios from "axios";
 import { API_URL } from "../../constants/API_URL";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+
 export const addCustomer = async (customerData: any) => {
   try {
     const token = await AsyncStorage.getItem("authToken");
@@ -27,8 +28,6 @@ export const fetchCustomers = async () => {
         },
       });
   
-      console.log("Response:", response.data); // Log full response
-  
       return response.data.customers; // Ensure the key is correct
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -39,3 +38,20 @@ export const fetchCustomers = async () => {
       return [];
     }
   };
+
+export const fetchUserTransactions = async (userId: string) => {
+  try {
+    console.log("user id  ",userId)
+    const token = await AsyncStorage.getItem("authToken");
+    const response = await axios.get(`${API_URL}/customer/getbyId/${userId}`,{
+      headers: {
+        Authorization: `Bearer ${token}`, 
+      },
+    });
+    console.log("data ",response.data.customer)
+    return response.data.customer;
+  } catch (error) {
+    console.error("Error fetching user transactions:", error);
+    return [];
+  }
+};

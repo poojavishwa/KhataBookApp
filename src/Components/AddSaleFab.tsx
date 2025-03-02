@@ -2,25 +2,25 @@ import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import { TouchableOpacity, Text, Image, StyleSheet } from "react-native";
 
-const AddServiceButton = () => {
+const AddSaleButton = () => {
   const navigation = useNavigation();
 
   const handlePress = () => {
-    navigation.navigate("Add Service"); // Navigate to CreateCustomer screen
+    navigation.navigate("Add Sale"); // Navigate to CreateCustomer screen
   };
 
   return (
     <TouchableOpacity style={styles.fab} onPress={handlePress}>
       <Image
-        source={require("../assets/addService.png")}
+        source={require("../assets/paper.png")}
         style={styles.icon}
       />
-      <Text style={styles.label}>Add Service</Text>
+      <Text style={styles.label}>Add Bill</Text>
     </TouchableOpacity>
   );
 };
 
-export default AddServiceButton;
+export default AddSaleButton;
 
 const styles = StyleSheet.create({
   fab: {
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 10,
     borderRadius: 25,
-    // elevation: 8,
+    // elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,

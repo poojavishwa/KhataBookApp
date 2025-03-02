@@ -4,13 +4,15 @@ import {
   Text, 
   StyleSheet, 
   FlatList, 
-  ActivityIndicator 
+  ActivityIndicator, 
+  TouchableOpacity
 } from "react-native";
 import AddCustomerButton from "../Components/AddCustomerFab";
 import { fetchCustomers } from "../Api/customer/customerCrud";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 const CustomersTab = () => {
+  const navigation = useNavigation();
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -46,9 +48,19 @@ const CustomersTab = () => {
           data={customers}
           keyExtractor={(item, index) => item?._id?.toString() || index.toString()}
           renderItem={({ item }) => (
+            <TouchableOpacity 
+            onPress={() => navigation.navigate("Customer Details", { userId: item._id })}
+          >
             <View style={styles.customerCard}>
+              <View>
               <Text style={styles.customerName}>{item.name}</Text>
+              <Text style={styles.customerphone}>{item.phone}</Text>
+              </View>
+              <View>
+              <Text style={styles.customerName}>₹ {item.balance}</Text>
+              </View>
             </View>
+            </TouchableOpacity>
           )}
         />
       )}
@@ -86,6 +98,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   customerCard: {
+    flexDirection:"row",
+    justifyContent:"space-between",
     backgroundColor: "white",
     padding: 15,
     marginBottom: 10,
@@ -96,8 +110,13 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   customerName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "500",
     color: "#333",
   },
+  customerphone:{
+    fontSize: 12,
+    fontWeight: "500",
+    color: "gray",
+  }
 });

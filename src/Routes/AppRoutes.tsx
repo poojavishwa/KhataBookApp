@@ -8,6 +8,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CreateCustomer from '../Screens/customerScreen/CreateCustomer';
 import CreateSupplier from '../Screens/supplierScreen/CreateSupplier';
 import CreateProduct from '../Screens/ProductsScreen/CreateProduct';
+import CustomerDetails from '../Screens/customerScreen/CustomerDetails';
+import CreateService from '../Screens/ServiceScreen/CreateService';
+import CreateSaleBill from '../Screens/billScreen/CreateSaleBill';
+import CreatePucheseScreen from '../Screens/billScreen/CreateParcheseBill';
 
 const Stack = createStackNavigator();
 
@@ -54,6 +58,10 @@ const AppNavigator = () => {
         <Stack.Screen name="Add Customer" component={CreateCustomer} />
         <Stack.Screen name="Add Supplier" component={CreateSupplier} />
         <Stack.Screen name="Add Product" component={CreateProduct} />
+        <Stack.Screen name="Customer Details" component={CustomerDetails} />
+        <Stack.Screen name="Add Service" component={CreateService} />
+        <Stack.Screen name="Add Sale" component={CreateSaleBill} />
+        <Stack.Screen name="Add Purchese" component={CreatePucheseScreen} />
       </Stack.Navigator>
   );
 };

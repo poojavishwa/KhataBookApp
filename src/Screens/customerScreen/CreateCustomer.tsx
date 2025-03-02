@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { addCustomer, fetchCustomers } from "../../Api/customer/customerCrud";
+import { addCustomer } from "../../Api/customer/customerCrud";
 
 const CreateCustomer = () => {
   const [name, setName] = useState("");
@@ -34,24 +34,24 @@ const CreateCustomer = () => {
       Alert.alert("Error", "Name and Phone Number are required!");
       return;
     }
-  
+
     let customerData: any = {
       name,
       phone,
       email,
       GSTIN: gstin,
     };
-  
+
     // Only add billingAddress if fields are filled
     if (showAdditionalFields) {
-       customerData.billingAddress = {
+      customerData.billingAddress = {
         flatOrBuildingNo: address.building,
         areaOrLocality: address.locality,
         pincode: address.pincode,
         city: address.city,
       };
     }
-  
+
     setLoading(true);
     try {
       await addCustomer(customerData);
@@ -63,8 +63,8 @@ const CreateCustomer = () => {
       setLoading(false);
     }
   };
-  
-  
+
+
   return (
     <ScrollView style={styles.container}>
       <TextInput
@@ -150,7 +150,7 @@ const CreateCustomer = () => {
         </>
       )}
 
-<TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
+      <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
         {loading ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
