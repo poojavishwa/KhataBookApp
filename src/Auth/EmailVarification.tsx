@@ -27,7 +27,7 @@ const EmailVerification = () => {
     if (response.success) {
       Alert.alert("Success", response.message);
       navigation.navigate("OTPVerification", { email: data.email, phoneNumber: data.phoneNumber });
-      console.log("send succefully",data.email, data.phoneNumber)
+      // console.log("send succefully",data.email, data.phoneNumber)
     } else {
       Alert.alert("Error", response.message);
     }

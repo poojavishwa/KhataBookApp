@@ -1,0 +1,268 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import RNHTMLtoPDF from "react-native-html-to-pdf";
+import RNFS from "react-native-fs";
+import { Image } from "react-native";
+import { requestStoragePermission } from "../Screens/billScreen/SaleInvoice";
+
+export const generatePDF = async (
+  billNumber,
+  date,
+  selectedCustomer,
+  selectedProducts,
+  halfGstAmount,
+  totalBasePrice,
+  totalGSTAmount,
+  paymentMethod,
+  halfGSTPercentage,
+  totalprice
+) => {
+
+  const userName = await AsyncStorage.getItem("userName");
+  const safeProducts = Array.isArray(selectedProducts) ? selectedProducts : [];
+  const safeTotalBasePrice = typeof totalBasePrice === "number" ? totalBasePrice : 0;
+  const safeTotalGSTAmount = typeof totalGSTAmount === "number" ? totalGSTAmount : 0;
+  const safeTotalPrice = typeof totalprice === "number" ? totalprice : 0;
+
+  const copyAssetToFileSystem = async (assetPath: string) => {
+    try {
+      const localFilePath = `${RNFS.CachesDirectoryPath}/${assetPath.split('/').pop()}`;
+      const assetUri = Image.resolveAssetSource(assetPath).uri;
+      // console.log("assetUri",assetUri);
+  
+      // Check if the file exists before copying
+      const fileExists = await RNFS.exists(localFilePath);
+      if (!fileExists) {
+        await RNFS.copyFile(assetUri, localFilePath);
+      }
+  
+      return localFilePath;
+    } catch (error) {
+      console.error("Error copying asset:", error);
+      return null;
+    }
+  };
+  
+  const getBase64Image = async (imageUri) => {
+    try {
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      
+      return new Promise((resolve, reject) => {
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error("Error converting image to base64:", error);
+      return null;
+    }
+  };
+  
+  
+  const paidImagePath = Image.resolveAssetSource(require("../assets/paid.png")).uri;
+  const unpaidImagePath = Image.resolveAssetSource(require("../assets/unpaid.png")).uri;
+  // console.log("unpaidImagePath",unpaidImagePath);
+  // console.log("paidImagePath",paidImagePath);
+  
+  const paidImageBase64 = await getBase64Image(paidImagePath);
+  const unpaidImageBase64 = await getBase64Image(unpaidImagePath);
+  
+  const selectedImageBase64 = paymentMethod === "Cash" || paymentMethod === "Online" ? paidImageBase64 : unpaidImageBase64;
+
+  const filePath = `${RNFS.DownloadDirectoryPath}/invoice_${billNumber}.pdf`;
+
+  try {
+    
+    const htmlContent = `
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 20px;
+              margin: 0;
+              color: #333;
+              background-color: #fff;
+            }
+            .invoice-box {
+              max-width: 800px;
+              margin: auto;
+              border: 2px solid #d32f2f;
+              padding: 20px;
+              border-radius: 10px;
+            }
+            .header {
+              text-align: center;
+              font-size: 20px;
+              font-weight: bold;
+              color: #d32f2f;
+            }
+            .invoice-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              font-size: 16px;
+            }
+            .customer-info {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              background:#FFEDEE;
+              padding: 10px;
+              margin-top: 10px;
+              border-radius: 5px;
+              font-size: 14px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 15px;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: center;
+            }
+            th {
+              background-color: #E5E5E5;
+              font-weight: bold;
+            }
+            .summary {
+              font-size: 16px;
+              font-weight: bold;
+              text-align: right;
+              margin-top: 10px;
+            }
+            .total-amount {
+              font-size: 22px;
+              font-weight: bold;
+              text-align: right;
+              color: #000;
+              margin-top: 15px;
+            }
+            .status {
+              font-size: 20px;
+              font-weight: bold;
+              color: blue;
+              text-align: right;
+              margin-top: 5px;
+            }
+            .total-amount{
+              font-size: 24px;
+              padding:4px;
+              width:fit-content;
+              font-weight: bold;
+              color: black;
+              text-align: right;
+              margin-top: 10px;
+              background-color:#E5E5E5;
+            }
+            .total-Price{
+            display:flex;
+            justify-content:end;
+            }
+            box{
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="invoice-box">
+            <div class="header">${userName}</div>
+            <div class="invoice-header">
+              <span>Invoice Date: ${new Date(date).toLocaleDateString('en-GB')}</span>
+              <span>Invoice No: <strong>${billNumber}</strong></span>
+            </div>
+            <div class="customer-info">
+            <div >
+              <p><strong style="color:#D32F2F">Bill To:</strong></p>
+              <p>Name: ${selectedCustomer.name}</p>
+              <p>Phone: ${selectedCustomer.phone}</p>
+            </div>
+            <div>
+              <img src="${selectedImageBase64}" width="100" height="100" />
+            </div>
+            </div>
+            <table>
+          <tr>
+            <th>S.No</th>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>GST%</th>
+            <th>Total</th>
+          </tr>
+  ${safeProducts
+        .map((item, index) => {
+          const basePrice = (item.price * 100) / (100 + item.gstPercentage);
+          return `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.name}</td>
+          <td>${item.quantity}</td>
+          <td>${basePrice.toFixed(2)}</td>
+         <td>${((item.price - basePrice) * item.quantity).toFixed(2)}%</td>
+          <td>${(item.price * item.quantity).toFixed(2)}</td>
+        </tr>
+      `;
+        })
+        .join("")}
+  
+  <!-- Subtotal Row -->
+  <tr style="background-color: #E5E5E5; font-weight: bold;">
+    <td colspan="2" style="text-align: center;">Subtotal</td>
+    <td>${safeProducts.reduce((sum, item) => sum + item.quantity, 0)}</td>
+    <td>${halfGstAmount.toFixed(2)}</td>
+    <td>${safeTotalBasePrice.toFixed(2)}</td>
+    <td>${safeTotalGSTAmount.toFixed(2)}</td>
+  </tr>
+</table>
+
+
+            <table>
+              <tr>
+                <th>Tax Slab</th>
+                <th>Taxable Amount</th>
+                <th>Tax</th>
+              </tr>
+              <tr>
+                <td>CGST ${halfGSTPercentage.toFixed(0)}%</td>
+                <td>${halfGstAmount.toFixed(2)}</td>
+                <td>${safeTotalPrice.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>SGST ${halfGSTPercentage.toFixed(0)}%</td>
+                <td>${halfGstAmount.toFixed(2)}</td>
+                <td>${safeTotalPrice.toFixed(2)}</td>
+              </tr>
+            </table>
+            <div class="total-Price">
+            <p class="total-amount">Total Amount -  ${safeTotalGSTAmount.toFixed(2)}</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const options = {
+      html: htmlContent,
+      fileName: `invoice_${billNumber}`,
+      directory: "Download",
+    };
+
+    const pdf = await RNHTMLtoPDF.convert(options);
+    // console.log("PDF generated at:", pdf.filePath);
+
+    const filePath = `${RNFS.DownloadDirectoryPath}/invoice_${billNumber}.pdf`;
+    await RNFS.moveFile(pdf.filePath, filePath);
+    // console.log("PDF saved to:", filePath);
+
+    return filePath;
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+    return null;
+  }
+};

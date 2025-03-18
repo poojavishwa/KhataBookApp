@@ -48,7 +48,8 @@ const CreateSupplier = () => {
          areaOrLocality: address.locality,
          pincode: address.pincode,
          city: address.city,
-       };
+         state:address.state,
+       }; 
      }
    
      setLoading(true);
@@ -57,7 +58,7 @@ const CreateSupplier = () => {
        navigation.goBack();
      } catch (error) {
        Alert.alert("Error", error.message);
-       console.log("error.message", error.message);
+       // console.log("error.message", error.message);
      } finally {
        setLoading(false);
      }

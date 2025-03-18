@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const sendOTP = async (email: string, phoneNumber: string) => {
   try {
-    console.log("API_URL",API_URL)
+    // // console.log("API_URL",API_URL)
     const response = await axios.post(`${API_URL}/user/send-Otp`, { email, phoneNumber });
 
     if (response.status === 200) {
@@ -27,10 +27,18 @@ export const verifyOTP = async (email: string, otp: string) => {
     );
 
       if (response.status === 200) {
-      const token = response.data.token; // Assuming token comes in response.data.token
-      console.log("token",token)
+      const token = response.data.token;
+      const userId= response.data.user._id;
+      const userName= response.data.user.username;
+      const phone= response.data.user.phoneNumber;
+      const email= response.data.user.email;
+
       if (token) {
-        await AsyncStorage.setItem("authToken", token); // Save token in storage
+        await AsyncStorage.setItem("authToken", token); 
+        await AsyncStorage.setItem("userId",userId); 
+        await AsyncStorage.setItem("userName",userName); 
+        await AsyncStorage.setItem("phone",phone); 
+        await AsyncStorage.setItem("email",email); 
       }
       return { success: true, message: "OTP Verified Successfully!" };
       } else {
@@ -40,4 +48,4 @@ export const verifyOTP = async (email: string, otp: string) => {
       console.error("Error verifying OTP:", error);
       return { success: false, message: error.response?.data?.message || "Network request failed." };
     }
-  };
+};

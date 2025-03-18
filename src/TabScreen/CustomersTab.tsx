@@ -15,7 +15,6 @@ const CustomersTab = () => {
   const navigation = useNavigation();
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
   const loadCustomers = async () => {
     setLoading(true);
     try {
@@ -35,8 +34,6 @@ const CustomersTab = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Customers List</Text>
-
       {loading ? (
         <View style={styles.loaderContainer}>
           <ActivityIndicator size="large" color="#007BFF" />
@@ -49,7 +46,7 @@ const CustomersTab = () => {
           keyExtractor={(item, index) => item?._id?.toString() || index.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity 
-            onPress={() => navigation.navigate("Customer Details", { userId: item._id })}
+            onPress={() => navigation.navigate("Customer Details", { customerId: item._id , name:item.name,phone:item.phone})}
           >
             <View style={styles.customerCard}>
               <View>

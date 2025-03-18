@@ -49,6 +49,7 @@ const CreateCustomer = () => {
         areaOrLocality: address.locality,
         pincode: address.pincode,
         city: address.city,
+        state:address.state,
       };
     }
 
@@ -58,7 +59,6 @@ const CreateCustomer = () => {
       navigation.goBack();
     } catch (error) {
       Alert.alert("Error", error.message);
-      console.log("error.message", error.message);
     } finally {
       setLoading(false);
     }

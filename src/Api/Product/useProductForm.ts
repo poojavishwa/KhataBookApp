@@ -64,7 +64,7 @@ const useProductForm = () => {
 
       if (contentType && contentType.includes("application/json")) {
         const result = await response.json();
-        console.log("Product added:", result);
+        // console.log("Product added:", result);
 
         if (response.ok) {
          Alert.alert("Product added successfully!");

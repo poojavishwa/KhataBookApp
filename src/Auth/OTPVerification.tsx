@@ -43,7 +43,7 @@ const { email } = route.params || {};
 
   const onSubmit = async (data: any) => {
     const otpCode = data.otp.join(""); // Convert OTP array to a single string
-    console.log("OTP Entered:", otpCode);
+    // console.log("OTP Entered:", otpCode);
   
     if (!email) {
       Alert.alert("Error", "Missing email.");
@@ -58,7 +58,7 @@ const { email } = route.params || {};
       await AsyncStorage.setItem("isLoggedIn", "true");
 
       const cookies = await CookieManager.get(API_URL);
-      console.log('Cookies after login:', cookies);
+      // console.log('Cookies after login:', cookies);
       navigation.dispatch(
         CommonActions.reset({
           index: 0,

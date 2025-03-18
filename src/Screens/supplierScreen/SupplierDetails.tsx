@@ -1,21 +1,22 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
-import { fetchCustomerGetById, fetchUserTransactions } from "../../Api/customer/customerCrud";
-import CustomerHeader from "../../Components/CustomerHeader";
+import SupplierHeader from "../../Components/SupplierHeader";
+import { fetchSupplierGetById, fetchUserTransactions } from "../../Api/supplier/supplierCrud";
 
-const CustomerDetails = () => {
+const SupplierDetails = () => {
     const route = useRoute();
     const navigation = useNavigation();
-    const { customerId, name, phone } = route.params as { customerId: string, name: string, phone: number };
+    const { supplierId, name, phone } = route.params as { supplierId: string, name: string, phone: number };
     const [transactions, setTransactions] = useState<any[]>([]);
-    const [getCustomrerById, setGetCustomerById] = useState<any[]>([]);
+    const [getSupplierById, setGetSupplierById] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+
     useEffect(() => {
-        const fetchCustomer = async () => {
+        const fetchSupplier = async () => {
             try {
-                const data = await fetchCustomerGetById(customerId);
-                setGetCustomerById(data);
+                const data = await fetchSupplierGetById(supplierId);
+                setGetSupplierById(data);
             } catch (error) {
                 console.error("Error fetching transactions:", error);
             } finally {
@@ -23,14 +24,14 @@ const CustomerDetails = () => {
             }
         };
 
-        if (customerId) {
-            fetchCustomer();
+        if (supplierId) {
+            fetchSupplier();
         }
-    }, [customerId]); 
+    }, [supplierId]); 
 
     const loadTransactions = async () => {
         try {
-            const data = await fetchUserTransactions(customerId);
+            const data = await fetchUserTransactions(supplierId);
             setTransactions(data);
         } catch (error) {
             console.error("Error fetching transactions:", error);
@@ -44,10 +45,9 @@ const CustomerDetails = () => {
         }, [])
     );
 
-
     return (
         <View style={styles.container}>
-            <CustomerHeader title="Customer Details" name={name} phone={phone} getCustomrerById={getCustomrerById}/>
+            <SupplierHeader title="Customer Details" name={name} phone={phone} getSupplierById={getSupplierById}/>
             <ScrollView contentContainerStyle={styles.content}>
                 {loading ? (
                     <ActivityIndicator size="large" color="#D32F2F" />
@@ -77,11 +77,11 @@ const CustomerDetails = () => {
             </ScrollView>
             <View style={styles.bottomButtons}>
                 <TouchableOpacity style={styles.stockInButton}
-                    onPress={() => navigation.navigate("Debit Transaction", { name:name, userId: customerId })}>
+                    onPress={() => navigation.navigate("Supplier Debit Transaction", { name:name, userId: supplierId })}>
                     <Text style={styles.buttonText}>You Gave ₹</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.stockOutButton}
-                    onPress={() => navigation.navigate("Credit Transaction", { name:name, userId: customerId })}
+                    onPress={() => navigation.navigate("Supplier Credit Transaction", { name:name, userId: supplierId })}
                 >
                     <Text style={styles.buttonText}>You Got ₹</Text>
                 </TouchableOpacity>
@@ -90,7 +90,7 @@ const CustomerDetails = () => {
     );
 };
 
-export default CustomerDetails;
+export default SupplierDetails;
 
 const styles = StyleSheet.create({
     container: {

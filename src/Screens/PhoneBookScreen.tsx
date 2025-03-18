@@ -15,7 +15,7 @@ const PhoneBookScreen = () => {
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           loadContacts();
         } else {
-          console.log("Contacts permission denied");
+          // console.log("Contacts permission denied");
         }
       } else {
         loadContacts();
@@ -26,18 +26,18 @@ const PhoneBookScreen = () => {
   }, []);
 
   const loadContacts = () => {
-    console.log("Contacts module before getAll:", Contacts);
+    // console.log("Contacts module before getAll:", Contacts);
 if (Contacts && Contacts.getAll) {
   Contacts.getAll()
     .then(contacts => {
-      console.log("Fetched contacts:", contacts);
+      // console.log("Fetched contacts:", contacts);
       setContacts(contacts);
     })
     .catch(error => {
-      console.log('Error loading contacts:', error.message || error);
+      // console.log('Error loading contacts:', error.message || error);
     });
 } else {
-  console.log("Contacts module is not available.");
+  // console.log("Contacts module is not available.");
 }
 
   };

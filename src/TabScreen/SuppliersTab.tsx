@@ -4,13 +4,15 @@ import {
   Text, 
   StyleSheet, 
   FlatList, 
-  ActivityIndicator 
+  ActivityIndicator, 
+  TouchableOpacity
 } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import AddSupplierButton from "../Components/AddSupplierFab";
 import { fetchSupplier } from "../Api/supplier/supplierCrud";
 
 const SupplierTab = () => {
+  const navigation = useNavigation();
   const [supplier, setsupplier] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +22,7 @@ const SupplierTab = () => {
       const data = await fetchSupplier();
       setsupplier(data);
     } catch (error) {
-      console.error("Error fetching customers:", error);
+      console.error("Error fetching supplier:", error);
     }
     setLoading(false);
   };
@@ -33,28 +35,36 @@ const SupplierTab = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Supplier List</Text>
-
-      {loading ? (
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#007BFF" />
-        </View>
-      ) : supplier.length === 0 ? (
-        <Text style={styles.emptyText}>No supplier found.</Text>
-      ) : (
-        <FlatList
-          data={supplier}
-          keyExtractor={(item, index) => item?._id?.toString() || index.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.customerCard}>
-              <Text style={styles.customerName}>{item.name}</Text>
+    {loading ? (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#007BFF" />
+      </View>
+    ) : supplier.length === 0 ? (
+      <Text style={styles.emptyText}>No supplier found.</Text>
+    ) : (
+      <FlatList
+        data={supplier}
+        keyExtractor={(item, index) => item?._id?.toString() || index.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity 
+          onPress={() => navigation.navigate("Supplier Details", { supplierId: item._id , name:item.name,phone:item.phone})}
+        >
+          <View style={styles.customerCard}>
+            <View>
+            <Text style={styles.customerName}>{item.name}</Text>
+            <Text style={styles.customerphone}>{item.phone}</Text>
             </View>
-          )}
-        />
-      )}
+            <View>
+            <Text style={styles.customerName}>₹ {item.balance}</Text>
+            </View>
+          </View>
+          </TouchableOpacity>
+        )}
+      />
+    )}
 
-      <AddSupplierButton />
-    </View>
+    <AddSupplierButton />
+  </View>
   );
 };
 
@@ -86,18 +96,25 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   customerCard: {
+    flexDirection:"row",
+    justifyContent:"space-between",
     backgroundColor: "white",
     padding: 15,
     marginBottom: 10,
-    elevation: 3, // Shadow for Android
-    shadowColor: "#000", // Shadow for iOS
+    elevation: 3,
+    shadowColor: "#000", 
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   customerName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "500",
     color: "#333",
   },
+  customerphone:{
+    fontSize: 12,
+    fontWeight: "500",
+    color: "gray",
+  }
 });

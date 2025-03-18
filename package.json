@@ -24,15 +24,22 @@
     "react-hook-form": "^7.54.2",
     "react-native": "0.78.0",
     "react-native-contacts": "^8.0.4",
+    "react-native-file-viewer": "^2.1.5",
     "react-native-floating-action": "^1.22.0",
+    "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.24.0",
+    "react-native-html-to-pdf": "^0.12.0",
     "react-native-image-picker": "^8.2.0",
     "react-native-pager-view": "^6.7.0",
+    "react-native-permissions": "^5.2.6",
     "react-native-reanimated": "^3.17.0",
     "react-native-safe-area-context": "^5.2.0",
     "react-native-screens": "^4.9.1",
+    "react-native-share": "^12.0.9",
+    "react-native-svg": "^15.11.2",
     "react-native-tab-view": "^4.0.5",
-    "react-native-vector-icons": "^10.2.0"
+    "react-native-vector-icons": "^10.2.0",
+    "react-native-view-shot": "^4.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

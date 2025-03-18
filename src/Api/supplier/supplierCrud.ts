@@ -27,7 +27,7 @@ export const fetchSupplier = async () => {
         },
       });
   
-      console.log("Response:", response.data); // Log full response
+      // console.log("Response:", response.data); // Log full response
   
       return response.data.suppliers; // Ensure the key is correct
     } catch (error) {
@@ -36,6 +36,93 @@ export const fetchSupplier = async () => {
       } else {
         console.error("Unexpected Error:", error);
       }
+      return [];
+    }
+  };
+
+  export const fetchUserTransactions = async (userId: string) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const response = await axios.get(`${API_URL}/supplier-transaction/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // // console.log("data ",response.data.transactions)
+      return response.data.transactions;
+    } catch (error) {
+      console.error("Error fetching user transactions:", error);
+      return [];
+    }
+  };
+
+  export const fetchSupplierGetById = async (userId: string) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const response = await axios.get(`${API_URL}/supplier/getbyId/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data.supplier;
+    } catch (error) {
+      console.error("Error fetching user transactions:", error);
+      return [];
+    }
+  };
+
+  export const addTransaction = async (supplierId: string, type: "credit" | "debit", amount: number) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const response = await fetch(`${API_URL}/supplier-transaction/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ supplierId, type, amount }),
+      });
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error adding transaction:", error);
+      throw error;
+    }
+  };
+
+  export const UpdateCustomerById = async (supplierData: any) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+  
+      const response = await axios.put(
+        `${API_URL}/supplier/update/`,
+        supplierData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating product:", error.response?.data || error.message);
+      throw error;
+    }
+  };
+  
+  export const DeleteById = async (supplierId: string) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const response = await axios.delete(`${API_URL}/supplier/delete/${supplierId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data.supplier;
+    } catch (error) {
+      console.error("Error fetching user transactions:", error);
       return [];
     }
   };
