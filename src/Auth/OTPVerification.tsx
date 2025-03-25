@@ -1,14 +1,16 @@
 import { CommonActions, useNavigation, useRoute } from "@react-navigation/native";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Animated, Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions, KeyboardAvoidingView, Platform, ScrollView, Alert } from "react-native";
 import { verifyOTP } from "../Api/auth/sendOtp";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CookieManager from "@react-native-cookies/cookies";
 import { API_URL } from "../constants/API_URL";
+import { showToast } from "../constants/showToast";
 
 const OTPVerification = () => {
   const navigation = useNavigation();
+    const [loading, setLoading] = useState(false);
   const { width } = Dimensions.get("window"); // Get screen width dynamically
   const { control, handleSubmit, setValue, watch } = useForm();
   const otpValues = watch("otp", ["", "", "", "", "", ""]);
@@ -42,23 +44,23 @@ const { email } = route.params || {};
   };
 
   const onSubmit = async (data: any) => {
+    setLoading(true);
     const otpCode = data.otp.join(""); // Convert OTP array to a single string
     // console.log("OTP Entered:", otpCode);
   
     if (!email) {
-      Alert.alert("Error", "Missing email.");
+      showToast("error","Error", "Missing email.");
       return;
     }
   
     const response = await verifyOTP(email, otpCode);
+    setLoading(false);
     if (response.success) {
-      Alert.alert("Success", response.message);
+      showToast("success","Success", response.message);
   
       // ✅ Save login state in AsyncStorage
       await AsyncStorage.setItem("isLoggedIn", "true");
 
-      const cookies = await CookieManager.get(API_URL);
-      // console.log('Cookies after login:', cookies);
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
@@ -66,7 +68,7 @@ const { email } = route.params || {};
         })
       );
     } else {
-      Alert.alert("Error", response.message);
+      showToast("error","Error", response.message);
     }
   };
   
@@ -75,7 +77,7 @@ const { email } = route.params || {};
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.flexContainer}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
-          <Image source={require("../assets/logoImage.png")} style={styles.logo} />
+          <Image source={require("../assets/DMblack.png")} style={styles.logo} />
           <Animated.View style={[styles.card, { opacity: fadeAnim, width: width * 0.9, maxWidth: 400 }]}>
             <Text style={styles.title}>Enter OTP</Text>
             <View style={styles.otpContainer}>
@@ -99,8 +101,8 @@ const { email } = route.params || {};
                 />
               ))}
             </View>
-            <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
-              <Text style={styles.buttonText}>Verify OTP</Text>
+            <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)} disabled={loading}>
+              <Text style={styles.buttonText}>{loading ? "verifying..." : "Verify OTP"}</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -163,7 +165,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#007BFF",
-    paddingVertical: 15,
+    paddingVertical: 10,
     paddingHorizontal: 40,
     borderRadius: 10,
   },
@@ -173,10 +175,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 600,
+    height: 200,
     resizeMode: "contain",
-    marginBottom: 20,
+    // marginBottom: 20,
   },
 });
 

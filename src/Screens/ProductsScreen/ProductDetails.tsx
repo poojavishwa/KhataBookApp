@@ -13,19 +13,25 @@ import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/nativ
 import { IMAGE_URL } from "../../constants/API_URL";
 import { DeleteById, fetchProductById } from "../../Api/Product/productCrud";
 import ProductHeader from "../../Components/ProductHeader";
+import ProductStockModal from "./ProductStockModal";
+import { showToast } from "../../constants/showToast";
 
 const ProductDetails = () => {
   const route = useRoute();
   const { productId } = route.params;
-    const navigation = useNavigation();
+  const navigation = useNavigation();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [product, setProduct] = useState(null);
+  const [logs, setLogs] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  console.log("logs", logs)
   const loadProduct = async () => {
     setLoading(true);
     try {
       const data = await fetchProductById(productId);
-      setProduct(data);
+      setProduct(data.product);
+      setLogs(data.logs);
     } catch (error) {
       console.error("Error fetching product details:", error);
     }
@@ -54,6 +60,11 @@ const ProductDetails = () => {
     );
   }
 
+  const handleStockAction = (type) => {
+    setSelectedProduct({ ...product, type });
+    setModalVisible(true);
+  };
+
   const handleDelete = async () => {
     Alert.alert("Confirm", "Are you sure you want to delete this product?", [
       {
@@ -65,16 +76,17 @@ const ProductDetails = () => {
         onPress: async () => {
           try {
             const result = await DeleteById(productId);
-            Alert.alert("Success", "Product deleted successfully!");
+            showToast("success","Success", "Product deleted successfully!");
             navigation.goBack()
           } catch (error) {
-            Alert.alert("Error", "Failed to delete product.");
+            showToast("error","Error", "Failed to delete product.");
           }
         },
       },
     ]);
 
   }
+  const filteredLogs = logs.filter(log => log.action !== "created");
 
   return (
     <>
@@ -104,7 +116,7 @@ const ProductDetails = () => {
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.label}>Purchase Price:</Text>
-            <Text style={styles.value}>₹{product.costPrice} </Text>
+            <Text style={styles.value}>₹{product.costPrice}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.label}>Stock Quantity:</Text>
@@ -112,34 +124,70 @@ const ProductDetails = () => {
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.label}>GST Included:</Text>
-            <Text style={styles.value}>{product.gstIncluded ? "Yes" : "No"} </Text>
+            <Text style={styles.value}>{product.gstIncluded ? "Yes" : "No"}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.label}>GST %:</Text>
-            <Text style={styles.value}>{product.gstPercentage} % </Text>
+            <Text style={styles.value}>{product.gstPercentage} %</Text>
           </View>
         </View>
+        <View style={styles.logs}>
+          {loading ? (
+            <ActivityIndicator size="large" color="#D32F2F" />
+          ) : filteredLogs.length === 0 ? (
+            <Text >No transactions found.</Text>
+          ) : (
+            filteredLogs.map((log) => (
+              <View
+                key={log._id}
+                style={[
+                  styles.transactionItem,
+                  log.action === "stock_in" ? styles.stock_in : styles.stock_out
+                ]}
+              >
+                <View style={styles.box}>
+                  <View>
+                    <Text style={styles.transactionDate}>
+                      {new Date(log.movementDate).toLocaleDateString()}
+                    </Text>
+                    <Text style={styles.transactionValue}>Previous Balance {log.changes.previousStock}      </Text>
+                  </View>
+                  <View>
+                    <Text style={styles.transactionValue}>
+                      {log.action === "stock_in" ? "⬇️In Stock" : "⬆️Out Stock"} {log.stockChange}     </Text>
+                    <Text style={styles.transactionValue}>₹{log.priceAtTime}</Text>
+                  </View>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
 
-        {/* Bottom Buttons */}
 
       </ScrollView>
       <View style={styles.bottomButtons}>
-        <TouchableOpacity style={styles.stockInButton}>
+        <TouchableOpacity style={styles.stockInButton} onPress={() => handleStockAction("IN")}>
           <Text style={styles.buttonText}>STOCK IN</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.stockOutButton}>
+        <TouchableOpacity style={styles.stockOutButton} onPress={() => handleStockAction("OUT")}>
           <Text style={styles.buttonText}>STOCK OUT</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.delelteBox}>
-      <TouchableOpacity
-        style={[styles.saveButton, loading ? styles.saveButtonDisabled : styles.deleteButtonActive]}
-        disabled={loading}
-        onPress={handleDelete}
-      >
-        <Text style={styles.deleteButtonText}>{loading ? "Deleting..." : "DELETE ITEM"}</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.saveButton, loading ? styles.saveButtonDisabled : styles.deleteButtonActive]}
+          disabled={loading}
+          onPress={handleDelete}
+        >
+          <Text style={styles.deleteButtonText}>{loading ? "Deleting..." : "DELETE ITEM"}</Text>
+        </TouchableOpacity>
       </View>
+      <ProductStockModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        selectedProduct={selectedProduct}
+        refreshProducts={loadProduct}
+      />
     </>
   );
 };
@@ -173,8 +221,8 @@ const styles = StyleSheet.create({
     marginVertical: 15,
   },
   productImage: {
-    width: 100,
-    height: 100,
+    width:85,
+    height: 85,
     borderRadius: 10,
   },
   imagePlaceholder: {
@@ -190,12 +238,13 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 15,
+    padding: 8,
+    borderRadius: 10,
     elevation: 5,
+    margin:10,
   },
   productName: {
-    fontSize: 22,
+    fontSize: 16,
     fontWeight: "bold",
     color: "#007BFF",
     textAlign: "center",
@@ -204,49 +253,89 @@ const styles = StyleSheet.create({
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+    alignItems: "center",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
   },
   label: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: "bold",
     color: "#555",
   },
   value: {
-    fontSize: 16,
+    fontSize: 12,
     color: "#333",
   },
   bottomButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 20,
-    marginHorizontal:10
+    marginHorizontal: 10
   },
   stockInButton: {
     backgroundColor: "#28A745",
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
     width: "48%",
     alignItems: "center",
+    fontSize:8,
   },
   stockOutButton: {
     backgroundColor: "#DC3545",
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
     width: "48%",
     alignItems: "center",
   },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 10,
     fontWeight: "bold",
   },
-  saveButton: { padding: 15, borderRadius: 5, alignItems: "center", marginTop: 10 },
+  saveButton: { padding: 10, borderRadius: 5, alignItems: "center", marginTop: 10 },
   saveButtonActive: { backgroundColor: "#007bff" },
   saveButtonDisabled: { backgroundColor: "#ccc" },
   saveButtonText: { color: "#fff", fontWeight: "bold" },
-  deleteButtonText: { color: "#DC3545", fontWeight: "bold" },
-  deleteButtonActive: { borderWidth:2,borderColor:"#DC3545" },
-  delelteBox:{marginHorizontal:10,marginBottom:10}
+  deleteButtonText: { color: "#DC3545", fontWeight: "bold" ,fontSize:10},
+  deleteButtonActive: { borderWidth: 2, borderColor: "#DC3545" },
+  delelteBox: { marginHorizontal: 10, marginBottom: 10 },
+  transactionItem: {
+    padding: 10,
+    borderRadius: 8,
+    marginVertical: 5,
+  },
+  stock_in: {
+    backgroundColor: "#E7F4E4", // Light green for stock in
+    borderLeftWidth: 5,
+    borderLeftColor: "#28A745", // Green border
+  },
+  stock_out: {
+    backgroundColor: "#FDECEA", // Light red for stock out
+    borderLeftWidth: 5,
+    borderLeftColor: "#DC3545", // Red border
+  },
+  transactionLabel: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  transactionValue: {
+    fontSize: 12,
+    color: "#555",
+  },
+  transactionDate: {
+    fontSize: 12,
+    color: "#6c757d",
+  },
+  box: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignContent: "center"
+  },
+  logs: {
+    margin: 10,
+  }
 });
 
 export default ProductDetails;

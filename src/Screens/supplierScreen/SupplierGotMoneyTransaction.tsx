@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { addTransaction } from "../../Api/supplier/supplierCrud";
+import { showToast } from "../../constants/showToast";
 
 const SupplierGotMoneyTansaction = () => {
   const [amount, setAmount] = useState("");
@@ -11,16 +12,16 @@ const SupplierGotMoneyTansaction = () => {
 
   const handleSave = async () => {
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
-      Alert.alert("Invalid Amount", "Please enter a valid amount.");
+      showToast("error","Invalid Amount", "Please enter a valid amount.");
       return;
     }
 
     try {
       await addTransaction(userId, "credit", Number(amount));
-      Alert.alert("Success", `₹${amount} given to ${name} successfully!`);
+      showToast("success","Success", `₹${amount} given to ${name} successfully!`);
       navigation.goBack(); // Navigate back after adding transaction
     } catch (error) {
-      Alert.alert("Error", "Failed to add transaction.");
+      showToast("error","Error", "Failed to add transaction.");
     }
   };
 

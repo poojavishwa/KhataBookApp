@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { DeleteById, fetchCustomerGetById, UpdateCustomerById } from "../../Api/customer/customerCrud";
+import { showToast } from "../../constants/showToast";
 
 const UpdateCustomer = () => {
   const route = useRoute();
@@ -52,36 +53,40 @@ const UpdateCustomer = () => {
   }, [CustomrerById]);
 
   const handleUpdate = async () => {
-    const updatedCustomer = {
+    const updatedCustomer: any = {
       customerId: CustomrerById._id,
       name,
       phone,
       email,
       GSTIN: gstin,
-      billingAddress: {
-        flatOrBuildingNo: address.building,
-        areaOrLocality: address.locality,
-        pincode: address.pincode,
-        city: address.city,
-        state: address.state,
-      },
     };
-
+  
+    // Check if address exists and if any field has changed before adding billingAddress
+    if (address && Object.values(address).some((value) => value !== "" && value !== null && value !== undefined)) {
+      updatedCustomer.billingAddress = {
+        ...(address.building && { flatOrBuildingNo: address.building }),
+        ...(address.locality && { areaOrLocality: address.locality }),
+        ...(address.pincode && { pincode: address.pincode }),
+        ...(address.city && { city: address.city }),
+        ...(address.state && { state: address.state }),
+      };
+    }
+  
     setLoading(true);
-
+  
     try {
       await UpdateCustomerById(updatedCustomer);
-      Alert.alert("Success", "Customer updated successfully!");
+      showToast("success", "Success", "Customer updated successfully!");
       await fetchCustomerGetById(CustomrerById._id);
       navigation.goBack();
     } catch (error) {
-      console.error("Error updating customer:", error);
-      Alert.alert("Error", "Failed to update customer.");
+      showToast("error", "Error", "Failed to update customer.");
     } finally {
       setLoading(false);
     }
   };
-
+  
+  
   const handleDelete = async () => {
     Alert.alert("Confirm", "Are you sure you want to delete this customer?", [
       {
@@ -93,10 +98,10 @@ const UpdateCustomer = () => {
         onPress: async () => {
           try {
             const result = await DeleteById(CustomrerById._id);
-            Alert.alert("Success", "Customer deleted successfully!");
+            showToast("success","Success", "Customer deleted successfully!");
             navigation.navigate("BottomNavigation", { screen: "Parties" })
           } catch (error) {
-            Alert.alert("Error", "Failed to delete customer.");
+            showToast("error","Error", "Failed to delete customer.");
           }
         },
       },
@@ -225,9 +230,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
-    padding: 10,
+    padding: 8,
     marginBottom: 12,
-    fontSize: 16,
+    fontSize: 12,
   },
   subHeading: {
     fontSize: 18,
@@ -246,30 +251,30 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   optionalText: {
-    fontSize: 16,
+    fontSize: 12,
     color: "#007BFF",
     fontWeight: "bold",
   },
   closeText: {
-    fontSize: 16,
+    fontSize: 12,
     color: "#007BFF",
     fontWeight: "bold",
   },
   button: {
     backgroundColor: "#007BFF",
-    paddingVertical: 12,
+    paddingVertical: 8,
     alignItems: "center",
-    borderRadius: 8,
+    borderRadius: 4,
     marginHorizontal:10,
   },
   buttonText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 12,
     fontWeight: "bold",
   },
-  deleteButtonText: { color: "#DC3545", fontWeight: "bold" },
+  deleteButtonText: { color: "#DC3545", fontWeight: "bold",fontSize:12 },
   deleteButtonActive: { borderWidth:2,borderColor:"#DC3545" },
   delelteBox:{marginHorizontal:10,marginBottom:10},
   saveButtonDisabled: { backgroundColor: "#ccc" },
-  saveButton: { padding: 15, borderRadius: 5, alignItems: "center", marginTop: 10 },
+  saveButton: { padding: 10, borderRadius: 5, alignItems: "center", marginTop: 10 },
 });

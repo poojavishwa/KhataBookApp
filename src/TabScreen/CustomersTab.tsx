@@ -10,11 +10,13 @@ import {
 import AddCustomerButton from "../Components/AddCustomerFab";
 import { fetchCustomers } from "../Api/customer/customerCrud";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import CustomerTotalHead from "../Screens/customerScreen/CustomerTotalHead";
 
 const CustomersTab = () => {
   const navigation = useNavigation();
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
   const loadCustomers = async () => {
     setLoading(true);
     try {
@@ -33,7 +35,9 @@ const CustomersTab = () => {
   );
 
   return (
+    <>
     <View style={styles.container}>
+    <CustomerTotalHead customers={customers}/>
       {loading ? (
         <View style={styles.loaderContainer}>
           <ActivityIndicator size="large" color="#007BFF" />
@@ -64,6 +68,7 @@ const CustomersTab = () => {
 
       <AddCustomerButton />
     </View>
+    </>
   );
 };
 
@@ -75,6 +80,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8F9FA",
     paddingHorizontal: 15,
     paddingTop: 10,
+    marginTop:10,
   },
   header: {
     fontSize: 22,
@@ -107,12 +113,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   customerName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "500",
     color: "#333",
   },
   customerphone:{
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "500",
     color: "gray",
   }

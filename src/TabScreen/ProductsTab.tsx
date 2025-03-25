@@ -13,6 +13,7 @@ import AddProductButton from "../Components/AddProductFab";
 import { fetchProducts } from "../Api/Product/productCrud";
 import { IMAGE_URL } from "../constants/API_URL";
 import ProductStockModal from "../Screens/ProductsScreen/ProductStockModal";
+import ProductTotalHead from "../Screens/ProductsScreen/ProductTotalHead";
 
 const ProductsTab = () => {
   const navigation = useNavigation();
@@ -46,6 +47,7 @@ const ProductsTab = () => {
   return (
     <>
       <View style={styles.container}>
+        <ProductTotalHead/>
         {loading ? (
           <View style={styles.loaderContainer}>
             <ActivityIndicator size="large" color="#007BFF" />
@@ -97,6 +99,7 @@ const ProductsTab = () => {
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
         selectedProduct={selectedProduct}
+        refreshProducts={loadProducts}
       />
 
     </>
@@ -135,18 +138,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "white",
-    padding: 15,
+    padding: 8,
     marginBottom: 10,
     borderRadius: 10,
-    elevation: 3,
+    // elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   productImage: {
-    width: 60,
-    height: 60,
+    width: 70,
+    height: 70,
     borderRadius: 10,
     marginRight: 15,
   },
@@ -154,17 +157,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   productName: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: "600",
     color: "#333",
   },
   productPrice: {
-    fontSize: 14,
+    fontSize: 10,
     color: "#007BFF",
     marginTop: 5,
   },
   productStock: {
-    fontSize: 14,
+    fontSize: 10,
     color: "#28A745",
     marginTop: 5,
   },
@@ -189,5 +192,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontWeight: "bold",
+    fontSize:10,
   },
+  
 });

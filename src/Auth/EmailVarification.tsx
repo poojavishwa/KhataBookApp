@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, Image, A
 import { useForm, Controller } from "react-hook-form";
 import { useNavigation } from "@react-navigation/native";
 import { sendOTP } from "../Api/auth/sendOtp";
+import { showToast } from "../constants/showToast";
 
 const EmailVerification = () => {
   const navigation = useNavigation();
@@ -25,18 +26,18 @@ const EmailVerification = () => {
     setLoading(false);
 
     if (response.success) {
-      Alert.alert("Success", response.message);
+      showToast("success","Success", response.message);
       navigation.navigate("OTPVerification", { email: data.email, phoneNumber: data.phoneNumber });
       // console.log("send succefully",data.email, data.phoneNumber)
     } else {
-      Alert.alert("Error", response.message);
+      showToast("error","Error", response.message);
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        <Image source={require("../assets/logoImage.png")} style={styles.logo} />
+        <Image source={require("../assets/DMblack.png")} style={styles.logo} />
         <Animated.View style={[styles.card, { opacity: fadeAnim }]}>
           <Text style={styles.title}>Verify Email</Text>
 
@@ -111,7 +112,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flex: 1,
     backgroundColor: "#f5f5f5",
-    padding: 20,
+    padding: 10,
   },
   card: {
     backgroundColor: "white",
@@ -135,10 +136,10 @@ const styles = StyleSheet.create({
   },
   input: {
     width: "100%",
-    height: 50,
+    height: 40,
     borderColor: "#ddd",
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     paddingHorizontal: 15,
     marginBottom: 10,
     backgroundColor: "#fafafa",
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#007BFF",
-    paddingVertical: 15,
+    paddingVertical: 10,
     paddingHorizontal: 40,
     borderRadius: 10,
     marginTop: 10,
@@ -162,10 +163,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 600,
+    height: 200,
     resizeMode: "contain",
-    marginBottom: 20,
+    // marginBottom: 20,
   },
 });
 

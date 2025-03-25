@@ -41,14 +41,10 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        height: 150,
+        height: 85,
         backgroundColor: "#fff",
         borderBottomWidth: 1,
         borderBottomColor: "#ddd",
-        padding: 20,
-    },
-    detailsBox:{
-
     },
     header: {
         flexDirection: 'row',

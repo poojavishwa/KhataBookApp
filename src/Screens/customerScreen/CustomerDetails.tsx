@@ -64,7 +64,7 @@ const CustomerDetails = () => {
                                     </Text>
                                 </View>
                                 <View>
-                                    <Text>₹{transaction.amount}   </Text>
+                                    <Text style={styles.amount}>₹{transaction.amount}   </Text>
                                 </View>
                             </View>
 
@@ -121,11 +121,11 @@ const styles = StyleSheet.create({
         backgroundColor: "#E7F4E4", // Light green
     },
     transactionText: {
-        fontSize: 16,
+        fontSize: 12,
         fontWeight: "bold",
     },
     transactionDate: {
-        fontSize: 14,
+        fontSize: 10,
         color: "#6c757d",
     },
     bottomButtons: {
@@ -140,27 +140,30 @@ const styles = StyleSheet.create({
     },
     stockInButton: {
         backgroundColor: "#28A745",
-        padding: 15,
+        padding: 10,
         borderRadius: 10,
         width: "48%",
         alignItems: "center",
     },
     stockOutButton: {
         backgroundColor: "#DC3545",
-        padding: 15,
+        padding: 10,
         borderRadius: 10,
         width: "48%",
         alignItems: "center",
     },
     buttonText: {
         color: "#fff",
-        fontSize: 16,
+        fontSize: 12,
         fontWeight: "bold",
     },
     box: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",  // Corrects alignment issue
+    },
+    amount:{
+        fontSize:12
     }
 
 

@@ -13,7 +13,7 @@ export const addCustomer = async (customerData: any) => {
       },
     });
 
-    return response.data; // Return API response data
+    return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to add customer.");
   }
@@ -125,5 +125,26 @@ export const DeleteById = async (customerId: string) => {
     return [];
   }
 };
+
+export const fetchCustomerTotal = async () => {
+  try {
+    const token = await AsyncStorage.getItem("authToken");
+    const response = await axios.get(`${API_URL}/customer/get`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data; 
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("Axios Error:", error.response?.data || error.message);
+    } else {
+      console.error("Unexpected Error:", error);
+    }
+    return [];
+  }
+};
+
 
 

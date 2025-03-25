@@ -30,7 +30,8 @@ export const fetchProductById = async (productId: string) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    return response.data.product;
+    console.log("response.data",response.data)
+    return  response.data ;
   } catch (error) {
     console.error("Error fetching user transactions:", error);
     return [];
@@ -73,4 +74,23 @@ export const DeleteById = async (productId: string) => {
   }
 };
 
+export const fetchProductTotal = async () => {
+  try {
+    const token = await AsyncStorage.getItem("authToken");
+    const response = await axios.get(`${API_URL}/product/get`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data; // Ensure the key is correct
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("Axios Error:", error.response?.data || error.message);
+    } else {
+      console.error("Unexpected Error:", error);
+    }
+    return [];
+  }
+};
 

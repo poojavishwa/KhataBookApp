@@ -26,6 +26,8 @@ import SupplierGotMoneyTansaction from '../Screens/supplierScreen/SupplierGotMon
 import UpdateSupplier from '../Screens/supplierScreen/UpdateSupplier';
 import SaleBillDetails from '../Screens/billScreen/SaleBillDetails';
 import UpdateSaleBill from '../Screens/billScreen/UpdateSaleBill';
+import PurcheseBillDetails from '../Screens/billScreen/PurcheseBillDetails';
+import UpdatePurcheseBill from '../Screens/billScreen/UpdatePurcheseBill';
 
 const Stack = createStackNavigator();
 
@@ -76,7 +78,7 @@ const AppNavigator = () => {
       <Stack.Screen name="Supplier Details" component={SupplierDetails}  options={{ headerShown: false }} />
       <Stack.Screen name="Add Service" component={CreateService} />
       <Stack.Screen name="Add Sale" component={CreateSaleBill} />
-      <Stack.Screen name="Add Purchese" component={CreatePucheseScreen} />
+      <Stack.Screen name="Add Purchase" component={CreatePucheseScreen} />
       <Stack.Screen
         name="Product Details"
         component={ProductDetails}
@@ -103,7 +105,7 @@ const AppNavigator = () => {
         component={InvoiceScreen}
       />
       <Stack.Screen
-        name="Purchese Invoice"
+        name="Purchase Invoice"
         component={PurcheseInvoiceScreen}
       />
   <Stack.Screen
@@ -126,6 +128,15 @@ const AppNavigator = () => {
         <Stack.Screen
         name="Update Sale Bill"
         component={UpdateSaleBill}
+      />
+        <Stack.Screen
+        name="Purchase Bill Details"
+        component={PurcheseBillDetails}
+        options={{ headerShown: false }}
+      />
+         <Stack.Screen
+        name="Update Purchase Bill"
+        component={UpdatePurcheseBill}
       />
     </Stack.Navigator>
   );

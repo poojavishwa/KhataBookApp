@@ -5,7 +5,7 @@ import AddServiceButton from '../Components/AddServicesFab';
 const Servicestab = () => {
   return (
     <View style={styles.container}>
-     <Text style={styles.text}>Services List</Text>
+     <Text style={styles.text}>Coming Soon   </Text>
      <AddServiceButton/>
    </View>
   )

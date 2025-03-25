@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, PermissionsAndroid, Platform, Image } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Share from "react-native-share";
@@ -6,6 +6,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { generatePDF } from "../../Components/GeneratePdf";
 import FileViewer from 'react-native-file-viewer';
 import { PurchesePdfGenerate } from "../../Components/PuchesePdfGenerate";
+import { showToast } from "../../constants/showToast";
+import { fetchCustomerGetById } from "../../Api/profile/profile";
 
 
 
@@ -15,6 +17,26 @@ const PurcheseInvoice = () => {
   const navigation = useNavigation();
   const userName = AsyncStorage.getItem("userName");
   const phone = AsyncStorage.getItem("phone");
+
+  const [userId, setUserId] = useState<string | null>(null);
+  const [customerData, setCustomerData] = useState<any>({});
+  console.log("customerData", customerData)
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      try {
+        const storedUserId = await AsyncStorage.getItem("userId");
+        if (storedUserId) {
+          setUserId(storedUserId);
+          const data = await fetchCustomerGetById(storedUserId);
+          setCustomerData(data);
+        }
+      } catch (error) {
+        console.error("Error fetching customer data:", error);
+      }
+    };
+
+    fetchCustomer();
+  }, []);
   const totalGSTAmount = selectedProducts.reduce((acc, item) => {
     const basePrice = (item.costPrice * 100) / (100 + item.gstPercentage); // Price excluding GST
     const gstAmount = item.costPrice - basePrice;
@@ -37,7 +59,7 @@ const PurcheseInvoice = () => {
 
   const gstItems = selectedProducts.filter((item) => item.gstPercentage > 0); // Exclude non-GST items
 
-  if (gstItems.length === 0) return null; // If no GST items, don't render the table
+  // if (gstItems.length === 0) return null; // If no GST items, don't render the table
 
   let totalBasePrice1 = 0;
   let totalGSTAmount1 = 0;
@@ -67,9 +89,9 @@ const PurcheseInvoice = () => {
   const shareInvoice = async () => {
     try {
       const filePath = await PurchesePdfGenerate(
-        billNumber, date, selectedCustomer, selectedProducts, 
-        totalBasePrice, totalGSTAmount, totalAmount, paymentMethod, 
-        halfGSTPercentage, halfGstAmount, totalprice
+        billNumber, date, selectedCustomer, selectedProducts,
+        totalBasePrice, totalGSTAmount, totalAmount, paymentMethod,
+        halfGSTPercentage, halfGstAmount, totalprice,customerData
       );
 
       if (filePath) {
@@ -80,7 +102,7 @@ const PurcheseInvoice = () => {
           message: `Invoice #${billNumber} - Total: ₹${totalAmount}`,
         });
       } else {
-        Alert.alert("Failed to share invoice.");
+        showToast("error", "Error", "Failed to share invoice.");
       }
     } catch (error) {
       console.error("Error sharing invoice:", error);
@@ -91,22 +113,47 @@ const PurcheseInvoice = () => {
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
         <View style={styles.invoiceContainer}>
-          <Text style={styles.header}>{selectedCustomer.name}</Text>
+          <View>
+            <Text style={styles.header}>{selectedCustomer.name}</Text>
+            {selectedCustomer.billingAddressId && (
+              <View>
+                <Text style={styles.addressText}>Address: {selectedCustomer.billingAddressId?.flatOrBuildingNo}</Text>
+                <Text style={styles.addressText}>
+                  {selectedCustomer.billingAddressId?.areaOrLocality}, {selectedCustomer.billingAddressId?.city}
+                </Text>
+                <Text style={styles.addressText}>
+                  {selectedCustomer.billingAddressId?.state}, {selectedCustomer.billingAddressId?.pincode}
+                </Text>
+              </View>
+            )}
+            {selectedCustomer.GSTIN && <Text style={styles.addressText}>GST IN :{selectedCustomer?.GSTIN}</Text>}
+          </View>
           <Text style={styles.invoiceNumber}>Invoice No. {billNumber}</Text>
           <Text style={styles.invoiceDate}>Invoice Date: {new Date(date).toLocaleDateString('en-GB')}</Text>
 
           <View style={[styles.box, styles.customerContainer]}>
             <View>
               <Text style={styles.customerTitle}>Bill To</Text>
-              <Text style={styles.customerName}>Name:  {userName}    </Text>
-              <Text style={styles.customerInfo}>Phone: {phone}      </Text>
+              <Text style={styles.customerName}>Name: {customerData?.username}    </Text>
+              {customerData.businessAddressId && (
+                <View>
+                  <Text style={styles.customerInfo}>Address: {customerData?.businessAddressId?.flatOrBuildingNo}</Text>
+                  <Text style={styles.customerInfo}>
+                    {customerData?.businessAddressId?.areaOrLocality}, {customerData?.businessAddressId?.city}
+                  </Text>
+                  <Text style={styles.customerInfo}>
+                    {customerData?.businessAddressId?.state} - {customerData?.businessAddressId?.pincode}
+                  </Text>
+                </View>
+              )}
+              {customerData.GSTIN && <Text style={styles.customerInfo}>GST IN :{customerData?.GSTIN}</Text>}
             </View>
             <View>
               <View>
-                  <Image
-              source={paymentMethod === "Cash" || paymentMethod === "Online" ? { uri: paidImageUri } : { uri: unpaidImageUri }}
-              style={styles.imageStyle}
-            />
+                <Image
+                  source={paymentMethod === "Cash" || paymentMethod === "Online" ? { uri: paidImageUri } : { uri: unpaidImageUri }}
+                  style={styles.imageStyle}
+                />
               </View>
             </View>
           </View>
@@ -172,16 +219,16 @@ const PurcheseInvoice = () => {
       </ScrollView>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.actionButton}>
+        {/* <TouchableOpacity style={styles.actionButton}>
           <Text style={styles.buttonText}>Download Invoice (PDF)</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity style={[styles.actionButton, { backgroundColor: "#25D366" }]} onPress={shareInvoice}>
-          <Text style={styles.buttonText}>Share PDF on WhatsApp</Text>
+          <Text style={styles.buttonText}>Share PDF on WhatsApp    </Text>
         </TouchableOpacity>
       </View>
       <View style={styles.bottomButtons}>
-        <TouchableOpacity style={styles.bottomButton} onPress={() => navigation.navigate("Add Purchese")}>
+        <TouchableOpacity style={styles.bottomButton} onPress={() => navigation.navigate("Add Purchase")}>
           <Text style={styles.bottomButtonText}>Create New</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.bottomButton, { backgroundColor: "#007bff" }]}
@@ -196,32 +243,33 @@ const PurcheseInvoice = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
   scrollView: { flex: 1 },
-  invoiceContainer: { padding: 20, backgroundColor: "#fff", borderWidth: 2, borderColor: "#D32F2F", margin: 10, borderRadius: 8 },
-  header: { fontSize: 18, fontWeight: "bold", textAlign: "center", color: "#D32F2F" },
-  invoiceNumber: { fontSize: 16, fontWeight: "bold", textAlign: "right" },
-  invoiceDate: { fontSize: 14, color: "#333", marginTop: 5 },
+  invoiceContainer: { padding: 10, backgroundColor: "#fff", borderWidth: 1, borderColor: "#D32F2F", margin: 10, borderRadius: 8 },
+  header: { fontSize: 18, fontWeight: "bold", textAlign: "right", color: "#D32F2F" },
+  invoiceNumber: { fontSize: 12, fontWeight: "bold" },
+  addressText: { fontSize: 10, textAlign: "right", color: "black" },
+  invoiceDate: { fontSize: 12, color: "#333", marginTop: 5 },
   customerContainer: { marginTop: 15, padding: 10, backgroundColor: "#FFEDEE", borderRadius: 5 },
-  customerTitle: { fontSize: 16, fontWeight: "bold", color: "#D32F2F" },
-  customerName: { fontSize: 18,color: "#555" },
-  customerInfo: { fontSize: 14, color: "#555" },
+  customerTitle: { fontSize: 12, fontWeight: "bold", color: "#D32F2F" },
+  customerName: { fontSize: 12, color: "#555" },
+  customerInfo: { fontSize: 10, color: "#555" },
   totalAmount: { fontSize: 18, fontWeight: "bold", textAlign: "right", marginTop: 20 },
   buttonContainer: { flexDirection: "row", justifyContent: "space-around", marginTop: 15 },
-  actionButton: { backgroundColor: "#007bff", padding: 10, borderRadius: 5 },
-  buttonText: { color: "#fff", fontSize: 16 },
-  tableHeader: { flexDirection: "row", backgroundColor: "#f0f0f0", padding: 10, marginTop: 15 },
-  tableHeaderText: { flex: 1, fontSize: 10, fontWeight: "bold", textAlign: "center" },
-  tableRow: { flexDirection: "row", padding: 10, borderBottomWidth: 1, borderBottomColor: "#ccc" },
-  tableText: { flex: 1, fontSize: 8, textAlign: "center" },
-  bottomButtons: { flexDirection: "row", justifyContent: "space-between", padding: 20 },
+  actionButton: { backgroundColor: "#007bff", padding: 8, borderRadius: 5 },
+  buttonText: { color: "#fff", fontSize: 10 },
+  tableHeader: { flexDirection: "row", backgroundColor: "#f0f0f0", padding: 5, marginTop: 15 },
+  tableHeaderText: { flex: 1, fontSize: 8, fontWeight: "bold", textAlign: "center" },
+  tableRow: { flexDirection: "row", padding: 5, borderBottomWidth: 1, borderBottomColor: "#ccc" },
+  tableText: { flex: 1, fontSize: 6, textAlign: "center" },
+  bottomButtons: { flexDirection: "row", justifyContent: "space-between", padding: 8 },
   bottomButton: { backgroundColor: "#ccc", padding: 10, borderRadius: 5, flex: 1, marginHorizontal: 5 },
-  bottomButtonText: { color: "#fff", fontSize: 16, textAlign: "center" },
+  bottomButtonText: { color: "#fff", fontSize: 10, textAlign: "center" },
   subtotalRow: {
     backgroundColor: "#f0f0f0",
     fontWeight: "bold",
   },
   boldText: {
     fontWeight: "bold",
-    fontSize: 10,
+    fontSize: 8,
   },
   summaryTable: {
     marginTop: 20,
@@ -236,12 +284,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   summaryLabel: {
-    fontSize: 20,
+    fontSize: 14,
     fontWeight: "bold",
     color: "#333",
   },
   summaryValue: {
-    fontSize: 20,
+    fontSize: 14,
     color: "#000",
   },
   payment: {
@@ -250,8 +298,8 @@ const styles = StyleSheet.create({
     color: "blue"
   },
   imageStyle: {
-    width: 70,
-    height: 70,
+    width: 60,
+    height: 60,
   },
   box: {
     flexDirection: "row",

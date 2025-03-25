@@ -126,3 +126,25 @@ export const fetchSupplier = async () => {
       return [];
     }
   };
+
+  export const fetchSupplierTotal = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const response = await axios.get(`${API_URL}/supplier/get`, {
+        headers: {
+          Authorization: `Bearer ${token}`, 
+        },
+      });
+  
+      // console.log("Response:", response.data); // Log full response
+  
+      return response.data; // Ensure the key is correct
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios Error:", error.response?.data || error.message);
+      } else {
+        console.error("Unexpected Error:", error);
+      }
+      return [];
+    }
+  };

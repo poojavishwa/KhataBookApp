@@ -4,6 +4,7 @@ import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { Picker } from "@react-native-picker/picker";
 import { ScrollView } from "react-native-gesture-handler";
 import useProductForm from "../../Api/Product/useProductForm";
+import { showToast } from "../../constants/showToast";
 
 const CreateProduct = () => {
   const { submitProduct, loading } = useProductForm();
@@ -42,8 +43,8 @@ const CreateProduct = () => {
   };
 
   const handleSubmit = () => {
-    if (!itemName || !salePrice || !purchasePrice || !imageUri) {
-      Alert.alert("Please fill all required fields.");
+    if (!itemName || !salePrice || !purchasePrice) {
+      showToast("error","Error","Please fill all required fields.");
       return;
     }
 
@@ -91,7 +92,9 @@ const CreateProduct = () => {
             <Picker
               selectedValue={selectedUnit}
               onValueChange={(itemValue) => setSelectedUnit(itemValue)}
-              style={styles.picker}
+              // style={styles.picker}
+              // style={{ fontSize: 2}}
+               mode="dropdown"
             >
               <Picker.Item label="Kilogram (kg)" value="kg" />
               <Picker.Item label="Gram (g)" value="g" />
@@ -184,7 +187,6 @@ const CreateProduct = () => {
 const styles = StyleSheet.create({
   container: { padding: 20, backgroundColor: "#fff", flex: 1 },
   header: { fontSize: 20, fontWeight: "bold", marginBottom: 15 },
-  // input: { borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 5, marginBottom: 10 },
   photoButton: { alignItems: "center", padding: 10, backgroundColor: "#e0e0e0", borderRadius: 5, marginBottom: 10 },
   photoText: { color: "black" },
   image: { width: 100, height: 100, borderRadius: 5, alignSelf: "center", marginTop: 10 },
@@ -192,25 +194,23 @@ const styles = StyleSheet.create({
   halfInput: { width: "48%" },
   switchRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginVertical: 10 },
   dropdownContainer: { marginBottom: 10 },
-  dropdownLabel: { fontSize: 16, marginBottom: 5, fontWeight: "500" },
-  saveButton: { padding: 15, borderRadius: 5, alignItems: "center", marginTop: 10 },
+  dropdownLabel: { fontSize: 12, marginBottom: 4, fontWeight: "500" },
+  saveButton: { padding: 10, borderRadius: 5, alignItems: "center", marginTop: 10 },
   saveButtonActive: { backgroundColor: "#007bff" },
   saveButtonDisabled: { backgroundColor: "#ccc" },
-  saveButtonText: { color: "#fff", fontWeight: "bold" },
+  saveButtonText: { color: "#fff", fontWeight: "bold",fontSize:12 },
   pickerContainer: {
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 5,
-    marginBottom: 10,
-    overflow: "hidden", // Ensures the border applies correctly
+    borderRadius: 6,
+    height: 30, // Reduced height
+    overflow: "hidden",
+    justifyContent: "center",
   },
-  picker: {
-    height: 50,
-    width: "100%",
-  },
-  inputContainer: {
-    width: "48%", // Ensure proper spacing in the row
-  },
+  // picker: {
+  //   fontSize: 8, 
+  //   // height: 35,
+  // },
   gridContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -220,11 +220,8 @@ const styles = StyleSheet.create({
   gridItem: {
     width: "48%", // Ensures two items per row
   },
-  gstContainer: {
-
-  },
   label: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "bold",
     marginBottom: 5,
     color: "#333",
@@ -232,10 +229,11 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    padding: 10,
+    padding: 6,
     borderRadius: 5,
     backgroundColor: "#fff",
-    marginBottom: 10
+    marginBottom: 10,
+    fontSize:10,
   },
 });
 

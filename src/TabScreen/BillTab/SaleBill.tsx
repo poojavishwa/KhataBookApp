@@ -84,8 +84,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8F9FA",
-    paddingHorizontal: 15,
-    paddingTop: 10,
+    paddingHorizontal: 8,
+    paddingTop: 8,
   },
   header: {
     fontSize: 22,
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     backgroundColor: "white",
-    padding: 15,
+    padding: 8,
     marginBottom: 10,
     elevation: 3,
     shadowColor: "#000",
@@ -118,22 +118,22 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   customerName: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: "500",
     color: "#333",
   },
   customerphone: {
-    fontSize: 12,
+    fontSize: 8,
     fontWeight: "500",
     color: "gray",
   },
   Invoice: {
     marginBottom: 5,
     marginTop: 5,
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "500",
     color: "gray",
-    padding: 4,
+    padding: 2,
     borderWidth: 2,
     borderColor: "gray",
     borderRadius: 5

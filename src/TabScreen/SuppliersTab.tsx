@@ -10,6 +10,7 @@ import {
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import AddSupplierButton from "../Components/AddSupplierFab";
 import { fetchSupplier } from "../Api/supplier/supplierCrud";
+import SupplierTotalHead from "../Screens/supplierScreen/SupplierTotalHead";
 
 const SupplierTab = () => {
   const navigation = useNavigation();
@@ -35,6 +36,7 @@ const SupplierTab = () => {
 
   return (
     <View style={styles.container}>
+      <SupplierTotalHead/>
     {loading ? (
       <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color="#007BFF" />
@@ -108,12 +110,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   customerName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "500",
     color: "#333",
   },
   customerphone:{
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "500",
     color: "gray",
   }

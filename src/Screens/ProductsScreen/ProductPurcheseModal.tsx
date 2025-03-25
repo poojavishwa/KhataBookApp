@@ -8,9 +8,10 @@ interface ProductSelectionModalProps {
     visible: boolean;
     onClose: () => void;
     onSelect: (product: string, quantity: number) => void;
+    selectedProducts?: { productId: string; quantity: number }[];
 }
 
-const ProductPurcheseModal: React.FC<ProductSelectionModalProps> = ({ visible, onClose, onSelect }) => {
+const ProductPurcheseModal: React.FC<ProductSelectionModalProps> = ({ visible, onClose, onSelect,selectedProducts }) => {
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [cart, setCart] = useState<{ [key: string]: number }>({});
@@ -26,10 +27,17 @@ const ProductPurcheseModal: React.FC<ProductSelectionModalProps> = ({ visible, o
     };
 
     useFocusEffect(
-        useCallback(() => {
-            loadProducts();
-        }, [])
-    );
+           useCallback(() => {
+               loadProducts();
+               if (selectedProducts) {
+                   const initialCart = selectedProducts.reduce((acc, product) => {
+                       acc[product.productId] = product.quantity;
+                       return acc;
+                   }, {} as { [key: string]: number });
+                   setCart(initialCart);
+               }
+           }, [selectedProducts])
+       );
 
     return (
         <Modal visible={visible} animationType="slide" transparent>
@@ -120,7 +128,7 @@ const ProductPurcheseModal: React.FC<ProductSelectionModalProps> = ({ visible, o
                                         productId:productId,
                                         name: product.name,
                                         quantity: cart[productId],
-                                        price: product.sellingPrice,
+                                        price: product.costPrice,
                                         gstPercentage:product.gstPercentage,
                                         costPrice:product.costPrice,
                                     };

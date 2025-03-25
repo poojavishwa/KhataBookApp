@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import AddPurcheseButton from "../../Components/AddPurcheseFab";
-import { fetchPurcheseBill, fetchSaleBill } from "../../Api/billCrud/BillCrud";
+import { fetchPurcheseBill } from "../../Api/billCrud/BillCrud";
 
 const PurchaseButton = () => {
   const navigation = useNavigation();
@@ -47,12 +47,12 @@ const PurchaseButton = () => {
           keyExtractor={(item, index) => item?._id?.toString() || index.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity
-            // onPress={() => navigation.navigate("Customer Details", { customerId: item._id , name:item.name,phone:item.phone})}
+            onPress={() => navigation.navigate("Purchase Bill Details", { billData: item })}
             >
               <View style={styles.customerCard}>
                 <View>
                   <Text style={styles.customerName}>{item.supplierId.name}</Text>
-                  <Text style={styles.Invoice}>Purchese Bill: #{item.BillNumber}</Text>
+                  <Text style={styles.Invoice}>Purchase Bill: #{item.BillNumber}</Text>
                   <Text style={styles.customerphone}>{item.supplierId.phone}</Text>
                 </View>
                 <View>
@@ -84,8 +84,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8F9FA",
-    paddingHorizontal: 15,
-    paddingTop: 10,
+    paddingHorizontal: 8,
+    paddingTop: 8,
   },
   header: {
     fontSize: 22,
@@ -106,36 +106,36 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   customerCard: {
-    flexDirection:"row",
-    justifyContent:"space-between",
+    flexDirection: "row",
+    justifyContent: "space-between",
     backgroundColor: "white",
-    padding: 15,
+    padding: 8,
     marginBottom: 10,
     elevation: 3,
-    shadowColor: "#000", 
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   customerName: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: "500",
     color: "#333",
   },
-  customerphone:{
-    fontSize: 12,
+  customerphone: {
+    fontSize: 8,
     fontWeight: "500",
     color: "gray",
   },
-  Invoice:{
-    marginBottom:5,
-    marginTop:5,
-    fontSize: 12,
+  Invoice: {
+    marginBottom: 5,
+    marginTop: 5,
+    fontSize: 10,
     fontWeight: "500",
     color: "gray",
-    padding:4,
-    borderWidth:2,
-    borderColor:"gray",
-    borderRadius:5
+    padding: 2,
+    borderWidth: 2,
+    borderColor: "gray",
+    borderRadius: 5
   }
 });

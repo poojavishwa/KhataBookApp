@@ -1,6 +1,8 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { DeleteById } from "../Api/billCrud/BillCrud";
+import { showToast } from "../constants/showToast";
 
 interface HeaderProps {
     title: string;
@@ -8,6 +10,28 @@ interface HeaderProps {
 
 const SaleBillHeader: React.FC<HeaderProps> = ({title,billData}) => {
     const navigation = useNavigation();
+
+      const handleDelete = async () => {
+        Alert.alert("Confirm", "Are you sure you want to delete this Bill?", [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Delete",
+            onPress: async () => {
+              try {
+                const result = await DeleteById(billData._id);
+                showToast("success","Success", "Bill deleted successfully!");
+                navigation.goBack()
+              } catch (error) {
+                showToast("error","Error", "Failed to delete Bill.");
+              }
+            },
+          },
+        ]);
+    
+      }
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -25,14 +49,15 @@ const SaleBillHeader: React.FC<HeaderProps> = ({title,billData}) => {
             >
                 <Image
                     source={require("../assets/edit.png")}
-                    style={{ height: 30, width: 30,marginRight:20,}}
+                    style={{ height: 20, width: 20,marginRight:20,}}
                 />
             </TouchableOpacity>
             <TouchableOpacity
+            onPress={handleDelete}
             >
                 <Image
                     source={require("../assets/bin.png")}
-                    style={{ height: 30, width: 30}}
+                    style={{ height: 20, width: 20}}
                 />
             </TouchableOpacity>
             </View>
@@ -45,11 +70,9 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        height: 150,
-        // backgroundColor: "red",
+        height: 85,
         borderBottomWidth: 1,
         borderBottomColor: "#ddd",
-        padding: 20,
     },
     iconBox:{
         flexDirection:"row",
@@ -74,7 +97,7 @@ const styles = StyleSheet.create({
         left: 16,
     },
     title: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: "bold",
     },
     phone: {

@@ -175,5 +175,77 @@ export const fetchSaleBillGetById = async (billId: string) => {
     console.error("Error fetching user transactions:", error);
     return [];
   }
+};  
+
+export const UpdateBillById = async (billData: any,billId:string) => {
+  try {
+    const token = await AsyncStorage.getItem("authToken");
+
+    const response = await axios.put(
+      `${API_URL}/update/sale-bill/${billId}`,
+      billData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating product:", error.response?.data || error.message);
+    throw error;
+  }
 };
-    
+
+export const DeleteById = async (billId: string) => {
+  try {
+    const token = await AsyncStorage.getItem("authToken");
+    const response = await axios.delete(`${API_URL}/delete/sale-bill/${billId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.saleBill;
+  } catch (error) {
+    console.error("Error fetching user transactions:", error);
+    return [];
+  }
+};
+
+export const UpdatePurcheseBillById = async (billData: any,billId:string) => {
+  try {
+    const token = await AsyncStorage.getItem("authToken");
+
+    const response = await axios.put(
+      `${API_URL}/update/purchase-bill/${billId}`,
+      billData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating product:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const DeletePurcheseBillById = async (billId: string) => {
+  try {
+    const token = await AsyncStorage.getItem("authToken");
+    console.log("billId",billId)
+    const response = await axios.delete(`${API_URL}/delete/purchase-bill/${billId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.purchaseBill;
+  } catch (error) {
+    console.error("Error fetching user transactions:", error);
+    return [];
+  }
+};

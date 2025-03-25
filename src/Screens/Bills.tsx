@@ -16,8 +16,8 @@ const Bills = () => {
     }}
   >
     <Tab.Screen name="Sale" component={SaleBill} />
-    <Tab.Screen name="Purchese" component={PurcheseBill} />
-    <Tab.Screen name="Expenses" component={Expenses} />
+    <Tab.Screen name="Purchase" component={PurcheseBill} />
+    {/* <Tab.Screen name="Expenses" component={Expenses} /> */}
   </Tab.Navigator>
   )
 }

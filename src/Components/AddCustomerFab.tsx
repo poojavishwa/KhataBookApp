@@ -40,14 +40,14 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   icon: {
-    width: 30,
-    height: 30,
+    width: 20,
+    height: 20,
     tintColor: "#fff",
     marginRight: 8,
   },
   label: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 10,
   },
 });

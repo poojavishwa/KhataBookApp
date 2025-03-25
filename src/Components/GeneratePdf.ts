@@ -2,45 +2,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import RNHTMLtoPDF from "react-native-html-to-pdf";
 import RNFS from "react-native-fs";
 import { Image } from "react-native";
-import { requestStoragePermission } from "../Screens/billScreen/SaleInvoice";
 
 export const generatePDF = async (
-  billNumber,
-  date,
-  selectedCustomer,
-  selectedProducts,
-  halfGstAmount,
-  totalBasePrice,
-  totalGSTAmount,
-  paymentMethod,
-  halfGSTPercentage,
-  totalprice
+  billNumber, date, selectedCustomer, selectedProducts, 
+  totalBasePrice, totalGSTAmount, totalAmount, paymentMethod, 
+  halfGSTPercentage, halfGstAmount, totalprice,customerData
 ) => {
 
-  const userName = await AsyncStorage.getItem("userName");
   const safeProducts = Array.isArray(selectedProducts) ? selectedProducts : [];
   const safeTotalBasePrice = typeof totalBasePrice === "number" ? totalBasePrice : 0;
   const safeTotalGSTAmount = typeof totalGSTAmount === "number" ? totalGSTAmount : 0;
   const safeTotalPrice = typeof totalprice === "number" ? totalprice : 0;
-
-  const copyAssetToFileSystem = async (assetPath: string) => {
-    try {
-      const localFilePath = `${RNFS.CachesDirectoryPath}/${assetPath.split('/').pop()}`;
-      const assetUri = Image.resolveAssetSource(assetPath).uri;
-      // console.log("assetUri",assetUri);
-  
-      // Check if the file exists before copying
-      const fileExists = await RNFS.exists(localFilePath);
-      if (!fileExists) {
-        await RNFS.copyFile(assetUri, localFilePath);
-      }
-  
-      return localFilePath;
-    } catch (error) {
-      console.error("Error copying asset:", error);
-      return null;
-    }
-  };
   
   const getBase64Image = async (imageUri) => {
     try {
@@ -62,15 +34,13 @@ export const generatePDF = async (
   
   const paidImagePath = Image.resolveAssetSource(require("../assets/paid.png")).uri;
   const unpaidImagePath = Image.resolveAssetSource(require("../assets/unpaid.png")).uri;
-  // console.log("unpaidImagePath",unpaidImagePath);
-  // console.log("paidImagePath",paidImagePath);
+
   
   const paidImageBase64 = await getBase64Image(paidImagePath);
   const unpaidImageBase64 = await getBase64Image(unpaidImagePath);
   
   const selectedImageBase64 = paymentMethod === "Cash" || paymentMethod === "Online" ? paidImageBase64 : unpaidImageBase64;
 
-  const filePath = `${RNFS.DownloadDirectoryPath}/invoice_${billNumber}.pdf`;
 
   try {
     
@@ -93,10 +63,10 @@ export const generatePDF = async (
               border-radius: 10px;
             }
             .header {
-              text-align: center;
-              font-size: 20px;
+              text-align: right;
+              font-size: 16px;
               font-weight: bold;
-              color: #d32f2f;
+              color:black;
             }
             .invoice-header {
               display: flex;
@@ -104,6 +74,12 @@ export const generatePDF = async (
               align-items: center;
               font-size: 16px;
             }
+            .address-header{
+               text-align: right;
+              font-size: 12px;
+              font-weight: bold;
+              color:black;
+              }
             .customer-info {
               display: flex;
               justify-content: space-between;
@@ -171,17 +147,33 @@ export const generatePDF = async (
         </head>
         <body>
           <div class="invoice-box">
-            <div class="header">${userName}</div>
-            <div class="invoice-header">
-              <span>Invoice Date: ${new Date(date).toLocaleDateString('en-GB')}</span>
-              <span>Invoice No: <strong>${billNumber}</strong></span>
+           <div class="invoice-header">
+              <div>
+                <strong>Invoice No: ${billNumber}</strong><br />
+                <strong>Invoice Date: ${new Date(date).toLocaleDateString('en-GB')}</strong>
+              </div>
             </div>
+            <div>
+                <div class="header">${customerData?.username || "Your Khana Name"}</div>
+                ${customerData.businessAddressId ? `
+                  <div class="address-header">${customerData.businessAddressId?.flatOrBuildingNo}</div>
+                  <div class="address-header">${customerData.businessAddressId?.areaOrLocality}</div>
+                  <div class="address-header">${customerData.businessAddressId?.pincode}</div>
+                ` : ''}
+                ${customerData.GSTIN ? `<div class="address-header">GST IN: ${customerData?.GSTIN}</div>` : ''}
+              </div>
             <div class="customer-info">
-            <div >
-              <p><strong style="color:#D32F2F">Bill To:</strong></p>
-              <p>Name: ${selectedCustomer.name}</p>
-              <p>Phone: ${selectedCustomer.phone}</p>
-            </div>
+             <div>
+                <strong>Bill To</strong><br />
+                Name: ${selectedCustomer.name}<br />
+                Phone: ${selectedCustomer.phone}<br />
+                ${selectedCustomer.billingAddressId ? `
+                  Address: ${selectedCustomer.billingAddressId?.flatOrBuildingNo}<br />
+                  ${selectedCustomer.billingAddressId?.areaOrLocality}, ${selectedCustomer.billingAddressId?.city}<br />
+                  ${selectedCustomer.billingAddressId?.state} - ${selectedCustomer.billingAddressId?.pincode}
+                ` : ''}
+                ${selectedCustomer.GSTIN ? `<br />GST IN: ${selectedCustomer?.GSTIN}` : ''}
+              </div>
             <div>
               <img src="${selectedImageBase64}" width="100" height="100" />
             </div>
@@ -215,9 +207,9 @@ export const generatePDF = async (
   <tr style="background-color: #E5E5E5; font-weight: bold;">
     <td colspan="2" style="text-align: center;">Subtotal</td>
     <td>${safeProducts.reduce((sum, item) => sum + item.quantity, 0)}</td>
-    <td>${halfGstAmount.toFixed(2)}</td>
     <td>${safeTotalBasePrice.toFixed(2)}</td>
     <td>${safeTotalGSTAmount.toFixed(2)}</td>
+    <td>${safeTotalPrice.toFixed(2)}</td>
   </tr>
 </table>
 
@@ -230,17 +222,17 @@ export const generatePDF = async (
               </tr>
               <tr>
                 <td>CGST ${halfGSTPercentage.toFixed(0)}%</td>
+                <td>${safeTotalBasePrice.toFixed(2)}</td>
                 <td>${halfGstAmount.toFixed(2)}</td>
-                <td>${safeTotalPrice.toFixed(2)}</td>
               </tr>
               <tr>
                 <td>SGST ${halfGSTPercentage.toFixed(0)}%</td>
+                <td>${safeTotalBasePrice.toFixed(2)}</td>
                 <td>${halfGstAmount.toFixed(2)}</td>
-                <td>${safeTotalPrice.toFixed(2)}</td>
               </tr>
             </table>
             <div class="total-Price">
-            <p class="total-amount">Total Amount -  ${safeTotalGSTAmount.toFixed(2)}</p>
+            <p class="total-amount">Total Amount -  ${safeTotalPrice.toFixed(2)}</p>
             </div>
           </div>
         </body>
@@ -254,11 +246,9 @@ export const generatePDF = async (
     };
 
     const pdf = await RNHTMLtoPDF.convert(options);
-    // console.log("PDF generated at:", pdf.filePath);
 
-    const filePath = `${RNFS.DownloadDirectoryPath}/invoice_${billNumber}.pdf`;
+    const filePath = `${RNFS.DocumentDirectoryPath}/invoice_${billNumber}.pdf`;
     await RNFS.moveFile(pdf.filePath, filePath);
-    // console.log("PDF saved to:", filePath);
 
     return filePath;
   } catch (error) {

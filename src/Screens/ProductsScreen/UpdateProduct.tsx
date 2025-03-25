@@ -6,6 +6,7 @@ import useProductForm from "../../Api/Product/useProductForm";
 import { IMAGE_URL } from "../../constants/API_URL";
 import { DeleteById, fetchProductById, submitProduct } from "../../Api/Product/productCrud";
 import { useNavigation } from "@react-navigation/native";
+import { showToast } from "../../constants/showToast";
 
 const UpdateProduct = ({ route }) => {
   const { loading } = useProductForm();
@@ -78,11 +79,11 @@ const UpdateProduct = ({ route }) => {
   
     try {
       const result = await submitProduct(updatedProduct);
-      Alert.alert("Success", "Product updated successfully!");
+      showToast("success","Success", "Product updated successfully!");
       fetchProductById(product._id)
       navigation.goBack()
     } catch (error) { 
-      Alert.alert("Error", "Failed to update product.");
+      showToast("error","Error", "Failed to update product.");
     }
   };
 
@@ -110,7 +111,7 @@ const UpdateProduct = ({ route }) => {
         <View style={styles.dropdownContainer}>
           <Text style={styles.dropdownLabel}>Select Unit:</Text>
           <View style={styles.pickerContainer}>
-            <Picker selectedValue={selectedUnit} onValueChange={setSelectedUnit} style={styles.picker}>
+            <Picker selectedValue={selectedUnit} onValueChange={setSelectedUnit} mode="dropdown">
               <Picker.Item label="Kilogram (kg)" value="kg" />
               <Picker.Item label="Gram (g)" value="g" />
               <Picker.Item label="Liter (li)" value="li" />
@@ -203,20 +204,22 @@ const styles = StyleSheet.create({
   container: { padding: 20, backgroundColor: "#fff", flex: 1 },
   photoButton: { alignItems: "center", padding: 10, backgroundColor: "#e0e0e0", borderRadius: 5, marginBottom: 10 },
   photoText: { color: "black" },
-  image: { width: 100, height: 100, borderRadius: 5, alignSelf: "center", marginTop: 10 },
+  image: { width: 70, height: 70, borderRadius: 5, alignSelf: "center", marginTop: 10 },
   switchRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginVertical: 10 },
   dropdownContainer: { marginBottom: 10 },
-  dropdownLabel: { fontSize: 16, marginBottom: 5, fontWeight: "500" },
-  saveButton: { padding: 15, borderRadius: 5, alignItems: "center", marginTop: 10 },
+  dropdownLabel: { fontSize: 12, marginBottom: 4, fontWeight: "500" },
+  saveButton: { padding: 10, borderRadius: 5, alignItems: "center", marginTop: 10 },
   saveButtonActive: { backgroundColor: "#007bff" },
   saveButtonDisabled: { backgroundColor: "#ccc" },
-  saveButtonText: { color: "#fff", fontWeight: "bold" },
-  pickerContainer: { borderWidth: 1, borderColor: "#ccc", borderRadius: 5, marginBottom: 10, overflow: "hidden" },
-  picker: { height: 50, width: "100%" },
-  gridContainer: { flexDirection: "row", justifyContent: "space-between", marginBottom: 10 },
+  saveButtonText: { color: "#fff", fontWeight: "bold",fontSize:12  },
+  pickerContainer: { borderWidth: 1, borderColor: "#ccc", borderRadius: 6,  height: 30, // Reduced height
+    overflow: "hidden",
+    justifyContent: "center", },
+  picker: { height: 45, width: "100%" },
+  gridContainer: { flexDirection: "row",flexWrap: "wrap", justifyContent: "space-between", marginBottom: 10 },
   gridItem: { width: "48%" },
-  label: { fontSize: 14, fontWeight: "bold", marginBottom: 5, color: "#333" },
-  input: { borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 5, backgroundColor: "#fff", marginBottom: 10 },
+  label: { fontSize: 12, fontWeight: "bold", marginBottom: 5, color: "#333" },
+  input: { borderWidth: 1, borderColor: "#ccc", padding: 6, borderRadius: 5, backgroundColor: "#fff", marginBottom: 10, fontSize:10, },
   buttonBox:{margin:10},
   deleteButtonActive: { backgroundColor: "#DC3545" },
 });

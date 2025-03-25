@@ -6,7 +6,7 @@ const AddPurcheseButton = () => {
   const navigation = useNavigation();
 
   const handlePress = () => {
-    navigation.navigate("Add Purchese"); // Navigate to CreateCustomer screen
+    navigation.navigate("Add Purchase"); // Navigate to CreateCustomer screen
   };
 
   return (
@@ -15,7 +15,7 @@ const AddPurcheseButton = () => {
         source={require("../assets/paper.png")}
         style={styles.icon}
       />
-      <Text style={styles.label}>Add Purchese</Text>
+      <Text style={styles.label}>Add Purchase</Text>
     </TouchableOpacity>
   );
 };
@@ -40,14 +40,14 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   icon: {
-    width: 30,
-    height: 30,
+    width: 20,
+    height: 20,
     tintColor: "#fff",
     marginRight: 8,
   },
   label: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 10,
   },
 });

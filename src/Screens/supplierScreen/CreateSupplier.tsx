@@ -7,9 +7,11 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { addSupplier } from "../../Api/supplier/supplierCrud";
 import { useNavigation } from "@react-navigation/native";
+import { showToast } from "../../constants/showToast";
 
 const CreateSupplier = () => {
   const [name, setName] = useState("");
@@ -30,7 +32,7 @@ const CreateSupplier = () => {
  
    const handleSubmit = async () => {
      if (!name || !phone) {
-       Alert.alert("Error", "Name and Phone Number are required!");
+       showToast("error","Error", "Name and Phone Number are required!");
        return;
      }
    
@@ -57,7 +59,7 @@ const CreateSupplier = () => {
        await addSupplier(supplierData);
        navigation.goBack();
      } catch (error) {
-       Alert.alert("Error", error.message);
+       showToast("error","Error", error.message);
        // console.log("error.message", error.message);
      } finally {
        setLoading(false);
@@ -153,8 +155,12 @@ const CreateSupplier = () => {
       )}
 
       {/* Submit Button */}
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Add Supplier</Text>
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}  disabled={loading}>
+       {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Add Supplier</Text>
+              )}
       </TouchableOpacity>
     </ScrollView>
   );
@@ -172,9 +178,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
-    padding: 10,
+    padding: 8,
     marginBottom: 12,
-    fontSize: 16,
+    fontSize: 12,
   },
   subHeading: {
     fontSize: 18,
@@ -193,25 +199,25 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   optionalText: {
-    fontSize: 16,
+    fontSize: 12,
     color: "#007BFF",
     fontWeight: "bold",
   },
   closeText: {
-    fontSize: 16,
+    fontSize: 12,
     color: "#007BFF",
     fontWeight: "bold",
   },
   button: {
     backgroundColor: "#007BFF",
-    paddingVertical: 12,
+    paddingVertical: 8,
     alignItems: "center",
     borderRadius: 8,
     marginBottom: 15,
   },
   buttonText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 12,
     fontWeight: "bold",
   },
 });

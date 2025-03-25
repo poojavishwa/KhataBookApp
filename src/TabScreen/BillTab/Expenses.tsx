@@ -5,7 +5,7 @@ import AddExpenseButton from '../../Components/AddExpenseFab'
 const Expenses = () => {
   return (
     <>
-      <Text>Expenses</Text>
+      <Text></Text>
       <AddExpenseButton/>
     </>
   )

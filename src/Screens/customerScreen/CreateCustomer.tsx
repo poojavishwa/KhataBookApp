@@ -6,11 +6,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { addCustomer } from "../../Api/customer/customerCrud";
+import { showToast } from "../../constants/showToast";
 
 const CreateCustomer = () => {
   const [name, setName] = useState("");
@@ -31,7 +31,7 @@ const CreateCustomer = () => {
 
   const handleSubmit = async () => {
     if (!name || !phone) {
-      Alert.alert("Error", "Name and Phone Number are required!");
+      showToast("error","Field Required", "Name and Phone Number are required!");
       return;
     }
 
@@ -56,9 +56,10 @@ const CreateCustomer = () => {
     setLoading(true);
     try {
       await addCustomer(customerData);
+      showToast("success", "Success", "Customer added successfully");
       navigation.goBack();
     } catch (error) {
-      Alert.alert("Error", error.message);
+      showToast("error", "Error", error.message);
     } finally {
       setLoading(false);
     }
@@ -173,9 +174,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
-    padding: 10,
+    padding: 8,
     marginBottom: 12,
-    fontSize: 16,
+    fontSize: 12,
   },
   subHeading: {
     fontSize: 18,
@@ -194,24 +195,24 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   optionalText: {
-    fontSize: 16,
+    fontSize: 12,
     color: "#007BFF",
     fontWeight: "bold",
   },
   closeText: {
-    fontSize: 16,
+    fontSize: 12,
     color: "#007BFF",
     fontWeight: "bold",
   },
   button: {
     backgroundColor: "#007BFF",
-    paddingVertical: 12,
+    paddingVertical: 8,
     alignItems: "center",
     borderRadius: 8,
   },
   buttonText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 12,
     fontWeight: "bold",
   },
 });
