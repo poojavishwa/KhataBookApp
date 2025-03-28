@@ -72,7 +72,7 @@ const CreateProduct = () => {
           <Text style={styles.label}>Product Name</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter item name here"
+            placeholder="Enter Producr Name "
             value={itemName}
             onChangeText={setItemName} />
         </View>
@@ -177,7 +177,7 @@ const CreateProduct = () => {
           style={[styles.saveButton, loading ? styles.saveButtonDisabled : styles.saveButtonActive]}
           onPress={handleSubmit} disabled={loading}
         >
-          <Text style={styles.saveButtonText}>{loading ? "Saving..." : "SAVE ITEM"}</Text>
+          <Text style={styles.saveButtonText}>{loading ? "Saving..." : "Add Item"}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -194,11 +194,11 @@ const styles = StyleSheet.create({
   halfInput: { width: "48%" },
   switchRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginVertical: 10 },
   dropdownContainer: { marginBottom: 10 },
-  dropdownLabel: { fontSize: 12, marginBottom: 4, fontWeight: "500" },
+  dropdownLabel: { fontSize: 14, marginBottom: 4, fontWeight: "500" },
   saveButton: { padding: 10, borderRadius: 5, alignItems: "center", marginTop: 10 },
   saveButtonActive: { backgroundColor: "#007bff" },
   saveButtonDisabled: { backgroundColor: "#ccc" },
-  saveButtonText: { color: "#fff", fontWeight: "bold",fontSize:12 },
+  saveButtonText: { color: "#fff", fontWeight: "bold",fontSize:14 },
   pickerContainer: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     width: "48%", // Ensures two items per row
   },
   label: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "bold",
     marginBottom: 5,
     color: "#333",
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: "#fff",
     marginBottom: 10,
-    fontSize:10,
+    fontSize:12,
   },
 });
 

@@ -118,19 +118,19 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   customerName: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "500",
     color: "#333",
   },
   customerphone: {
-    fontSize: 8,
+    fontSize: 10,
     fontWeight: "500",
     color: "gray",
   },
   Invoice: {
     marginBottom: 5,
     marginTop: 5,
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "500",
     color: "gray",
     padding: 2,

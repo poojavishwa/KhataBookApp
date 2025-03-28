@@ -5,12 +5,14 @@ import { TouchableOpacity, Text, Image, StyleSheet } from "react-native";
 const AddServiceButton = () => {
   const navigation = useNavigation();
 
-  const handlePress = () => {
-    navigation.navigate("Add Service"); // Navigate to CreateCustomer screen
-  };
+  // const handlePress = () => {
+  //   navigation.navigate("Add Service"); // Navigate to CreateCustomer screen
+  // };
 
   return (
-    <TouchableOpacity style={styles.fab} onPress={handlePress}>
+    <TouchableOpacity style={styles.fab} 
+    // onPress={handlePress}
+    >
       <Image
         source={require("../assets/addService.png")}
         style={styles.icon}
@@ -48,6 +50,6 @@ const styles = StyleSheet.create({
   label: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 10,
+    fontSize: 14,
   },
 });

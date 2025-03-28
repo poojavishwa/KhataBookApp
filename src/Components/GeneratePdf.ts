@@ -13,34 +13,15 @@ export const generatePDF = async (
   const safeTotalBasePrice = typeof totalBasePrice === "number" ? totalBasePrice : 0;
   const safeTotalGSTAmount = typeof totalGSTAmount === "number" ? totalGSTAmount : 0;
   const safeTotalPrice = typeof totalprice === "number" ? totalprice : 0;
-  
-  const getBase64Image = async (imageUri) => {
-    try {
-      const response = await fetch(imageUri);
-      const blob = await response.blob();
-      const reader = new FileReader();
-      
-      return new Promise((resolve, reject) => {
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.error("Error converting image to base64:", error);
-      return null;
-    }
-  };
-  
-  
-  const paidImagePath = Image.resolveAssetSource(require("../assets/paid.png")).uri;
-  const unpaidImagePath = Image.resolveAssetSource(require("../assets/unpaid.png")).uri;
 
   
-  const paidImageBase64 = await getBase64Image(paidImagePath);
-  const unpaidImageBase64 = await getBase64Image(unpaidImagePath);
+  const paidImageUrl = "https://res.cloudinary.com/dpbx63xbs/image/upload/v1743071474/b1gxpxky2f6our77uwj6.png";
+  const unpaidImageUrl = "https://res.cloudinary.com/dpbx63xbs/image/upload/v1743071474/xraxi7glabfbmqjj9xus.png";
   
-  const selectedImageBase64 = paymentMethod === "Cash" || paymentMethod === "Online" ? paidImageBase64 : unpaidImageBase64;
-
+  const selectedImageBase64 = paymentMethod === "Cash" || paymentMethod === "Online"
+    ? paidImageUrl
+    : unpaidImageUrl
+  
 
   try {
     

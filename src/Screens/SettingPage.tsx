@@ -176,8 +176,8 @@ const SettingPage = () => {
         {customerData?.businessAddressId && (
           <View style={styles.addressContainer}>
             <Text style={styles.addressText}>
-              {customerData.businessAddressId.flatOrBuildingNo}, {"\n"}
-              {customerData.businessAddressId.areaOrLocality}, {"\n"}
+              {customerData.businessAddressId.flatOrBuildingNo}, 
+              {customerData.businessAddressId.areaOrLocality},
               {customerData.businessAddressId.pincode}
             </Text>
           </View>

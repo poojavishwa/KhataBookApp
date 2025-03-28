@@ -23,7 +23,7 @@ const CustomerHeader: React.FC<HeaderProps> = ({ title,name ,phone,getCustomrerB
                 </View>
             </View>
             <TouchableOpacity
-                style={{ marginRight: 15, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
+                style={{ marginRight: 15, marginTop:20, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
                 onPress={() => navigation.navigate("Update Customer",{CustomrerById:getCustomrerById})}
             >
                 <Image
@@ -41,18 +41,17 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        height: 85,
+        height: 100,
         backgroundColor: "#fff",
         borderBottomWidth: 1,
         borderBottomColor: "#ddd",
-    },
-    detailsBox:{
-
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         padding: 15,
+        marginTop:20,
+        
       },
       backButton: {
         marginRight: 10,

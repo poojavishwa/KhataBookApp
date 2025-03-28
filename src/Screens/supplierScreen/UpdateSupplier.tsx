@@ -201,7 +201,7 @@ const UpdateSupplier = () => {
         {loading ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
-          <Text style={styles.buttonText} onPress={handleUpdate}>Update Customer</Text>
+          <Text style={styles.buttonText} onPress={handleUpdate}>Update Supplier</Text>
         )}
       </TouchableOpacity>
       <View style={styles.delelteBox}>
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 8,
     marginBottom: 12,
-    fontSize: 12,
+    fontSize: 14,
   },
   subHeading: {
     fontSize: 18,
@@ -251,12 +251,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   optionalText: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#007BFF",
     fontWeight: "bold",
   },
   closeText: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#007BFF",
     fontWeight: "bold",
   },
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "bold",
   },
   deleteButtonText: { color: "#DC3545", fontWeight: "bold",fontSize: 12, },

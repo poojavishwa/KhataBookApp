@@ -103,13 +103,12 @@ const UpdateSaleBill = () => {
       <View style={{ padding: 20 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 5 }}>
           <View>
-            <Text style={{ fontSize: 14 }}>Sale Bill Number:</Text>
+            <Text style={{ fontSize: 14 }}>Sale Bill No:    </Text>
             <Text style={{ fontSize: 12, fontWeight: "bold", borderWidth: 1, padding: 8,borderColor:"#D0DDD0" }}>{billNumber}</Text>
           </View>
           <View>
             <Text style={{ fontSize: 14 }}>Select Date:</Text>
             <TouchableOpacity onPress={() => setShowDatePicker(true)} style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, padding: 8 ,borderColor:"#D0DDD0"}}>
-              <Text style={{ fontSize: 12 }}>📅</Text>
               <Text style={{ fontSize: 12, marginLeft: 5 }}>{date.toDateString()}</Text>
             </TouchableOpacity>
           </View>
@@ -124,8 +123,8 @@ const UpdateSaleBill = () => {
 
         <Text style={{ fontSize: 14, marginTop: 10 }}>Bill To:</Text>
         <TouchableOpacity onPress={() => setCustomerModalVisible(true)} style={{ borderWidth: 1, padding: 10, marginTop: 5, borderRadius: 5,borderColor:"#D0DDD0" }}>
-          <Text style={{ fontSize: 12 }}>{selectedCustomer?.name || "Select a Customer"}</Text>
-          <Text style={{ fontSize: 10 }}>{selectedCustomer?.phone || "Select a Customer"}</Text>
+          <Text style={{ fontSize: 14 }}>{selectedCustomer?.name || "Select a Customer"}</Text>
+          <Text style={{ fontSize: 12 }}>{selectedCustomer?.phone || "Select a Customer"}</Text>
         </TouchableOpacity>
 
         <Text style={{ fontSize: 14, marginTop: 10 }}>Items:</Text>
@@ -177,12 +176,12 @@ const UpdateSaleBill = () => {
 const styles = StyleSheet.create({
   selectedProductBox: { flexDirection: "row", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: 10, marginVertical: 5, borderRadius: 5 },
   productName: { fontSize: 12, fontWeight: "bold", color: "#333" },
-  productDetails: { fontSize: 10, color: "#555" },
-  productPrice: { fontSize: 12, fontWeight: "bold", color: "#007AFF" },
+  productDetails: { fontSize: 12, color: "#555" },
+  productPrice: { fontSize: 14, fontWeight: "bold", color: "#007AFF" },
   totalContainer: { flexDirection: "row", justifyContent: "space-between", marginTop: 30, padding: 10,borderColor: "#D0DDD0", borderWidth: 1 },
   totalText: { fontSize: 14, fontWeight: "bold" },
   totalAmount: { fontSize: 14, fontWeight: "bold", color: "green" },
-  actionButton: { backgroundColor: "#007AFF", padding: 8, borderRadius: 5, alignItems: "center",fontSize:10 },
+  actionButton: { backgroundColor: "#007AFF", padding: 8, borderRadius: 5, alignItems: "center",fontSize:12 },
   bottomButtonContainer: {
     marginHorizontal:20,
     bottom: 20,

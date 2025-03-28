@@ -249,3 +249,41 @@ export const DeletePurcheseBillById = async (billId: string) => {
     return [];
   }
 };
+
+export const fetchSaleBillNo = async () => {
+  try {
+    const token = await AsyncStorage.getItem("authToken");
+    const response = await axios.get(
+      `${API_URL}/get/billNo`, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json", 
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user transactions:", error);
+    return [];
+  }
+};
+
+export const fetchPurchaseBillNo = async () => {
+  try {
+    const token = await AsyncStorage.getItem("authToken");
+    const response = await axios.get(
+      `${API_URL}/get/purchase-billNo`, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json", 
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user transactions:", error);
+    return [];
+  }
+};

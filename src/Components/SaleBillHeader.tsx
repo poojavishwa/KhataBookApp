@@ -45,6 +45,7 @@ const SaleBillHeader: React.FC<HeaderProps> = ({title,billData}) => {
             </View>
             <View style={styles.iconBox}>
             <TouchableOpacity
+            style={{ marginRight: 15,marginTop:20, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
             onPress={() => navigation.navigate("Update Sale Bill",{saleBillData:billData})}
             >
                 <Image
@@ -53,6 +54,7 @@ const SaleBillHeader: React.FC<HeaderProps> = ({title,billData}) => {
                 />
             </TouchableOpacity>
             <TouchableOpacity
+            style={{ marginRight: 15,marginTop:20, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
             onPress={handleDelete}
             >
                 <Image
@@ -70,7 +72,8 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        height: 85,
+        backgroundColor:"#fff",
+        height: 100,
         borderBottomWidth: 1,
         borderBottomColor: "#ddd",
     },
@@ -84,6 +87,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         padding: 15,
+        marginTop:20
       },
       backButton: {
         marginRight: 10,
@@ -97,11 +101,7 @@ const styles = StyleSheet.create({
         left: 16,
     },
     title: {
-        fontSize: 16,
-        fontWeight: "bold",
-    },
-    phone: {
-        fontSize: 12,
+        fontSize: 18,
         fontWeight: "bold",
     },
 });

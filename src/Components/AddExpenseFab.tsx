@@ -48,6 +48,6 @@ const styles = StyleSheet.create({
   label: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 14,
   },
 });

@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, TouchableOpacity, Alert, StyleSheet, Act
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation } from "@react-navigation/native";
-import { savePurcheseBill } from "../../Api/billCrud/BillCrud";
+import { fetchPurchaseBillNo, savePurcheseBill } from "../../Api/billCrud/BillCrud";
 import ProductPurcheseModal from "../ProductsScreen/ProductPurcheseModal";
 import SupplierModal from "../supplierScreen/SupplierModal";
 import { showToast } from "../../constants/showToast";
@@ -29,12 +29,21 @@ const CreatePurcheseScreen = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isAdLoaded, setIsAdLoaded] = useState(false);
 
+
   useEffect(() => {
-    const getLastBillNumber = async () => {
-      const lastBill = await AsyncStorage.getItem("lastBillNumber");
-      setBillNumber(lastBill ? parseInt(lastBill) + 1 : 1);
+    const getSaleBills = async () => {
+      try {
+        const data = await fetchPurchaseBillNo();
+      const maxBillNumber = data?.lastBillNumber ? parseInt(data.lastBillNumber, 10) : 0;
+      console.log("Last Bill Number:", maxBillNumber);
+      
+      setBillNumber(maxBillNumber + 1);
+      } catch (error) {
+        console.error("Error fetching sale bills:", error);
+      }
     };
-    getLastBillNumber();
+
+    getSaleBills();
     const unsubscribe = interstitial.addAdEventListener(AdEventType.LOADED, () => {
       setIsAdLoaded(true);
     });
@@ -119,9 +128,8 @@ const CreatePurcheseScreen = () => {
 
           {/* Date Picker */}
           <View>
-            <Text style={{ fontSize: 12 }}>Select Date:     </Text>
+            <Text style={{ fontSize: 14 }}>Select Date:     </Text>
             <TouchableOpacity onPress={() => setShowDatePicker(true)} style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, padding: 8,borderColor:"#D0DDD0" }}>
-              <Text style={{ fontSize: 12 }}>📅</Text>
               <Text style={{ fontSize: 12, marginLeft: 5 }}>{date.toDateString()}</Text>
             </TouchableOpacity>
           </View>
@@ -145,7 +153,7 @@ const CreatePurcheseScreen = () => {
           onPress={() => setCustomerModalVisible(true)}
           style={{ borderWidth: 1, padding: 10, marginTop: 5, borderRadius: 5,borderColor:"#D0DDD0"  }}
         >
-          <Text>{selectedCustomer.name || "Select a Customer"}</Text>
+          <Text style={{fontSize: 12, color: "#777" }}>{selectedCustomer.name || "Select a Supplier"}</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("Add Supplier")}>
           <Text style={{ color: "blue", marginTop: 6,fontSize:12  }}>+ ADD NEW PARTY</Text>
@@ -167,15 +175,15 @@ const CreatePurcheseScreen = () => {
             selectedProducts.map((item, index) => (
               <View key={index} style={styles.selectedProductBox}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 10, fontWeight: "bold", color: "#333" }}>
+                  <Text style={{ fontSize: 12, fontWeight: "bold", color: "#333" }}>
                     {item.name}
                   </Text>
-                  <Text style={{ fontSize: 10, color: "#555" }}>
+                  <Text style={{ fontSize: 12, color: "#555" }}>
                     {item.quantity} x ₹{item.costPrice}
                   </Text>
                 </View>
                 <View>
-                  <Text style={{ fontSize: 10, fontWeight: "bold", color: "#007AFF" }}>
+                  <Text style={{ fontSize: 12, fontWeight: "bold", color: "#007AFF" }}>
                     ₹{item.quantity * item.costPrice}
                   </Text>
                 </View>
@@ -187,7 +195,7 @@ const CreatePurcheseScreen = () => {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("Add Product")}>
-          <Text style={{ color: "blue", marginTop: 6,fontSize:12}}>+ ADD NEW ITEM</Text>
+          <Text style={{ color: "blue", marginTop: 6,fontSize:14}}>+ ADD NEW ITEM</Text>
         </TouchableOpacity>
 
         <View
@@ -231,7 +239,7 @@ const CreatePurcheseScreen = () => {
           {isSaving ? (
             <ActivityIndicator size="small" color="#fff" />
           ) : (
-            <Text style={{ color: "white", fontSize: 14 }}>Save Bill</Text>
+            <Text style={{ color: "white", fontSize: 14 }}>Save Bill   </Text>
           )}
         </TouchableOpacity>
       </View>

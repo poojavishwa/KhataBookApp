@@ -121,11 +121,11 @@ const styles = StyleSheet.create({
         backgroundColor: "#E7F4E4", // Light green
     },
     transactionText: {
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: "bold",
     },
     transactionDate: {
-        fontSize: 10,
+        fontSize: 12,
         color: "#6c757d",
     },
     bottomButtons: {

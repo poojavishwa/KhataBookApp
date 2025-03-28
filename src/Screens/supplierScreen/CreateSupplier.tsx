@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 8,
     marginBottom: 12,
-    fontSize: 12,
+    fontSize: 14,
   },
   subHeading: {
     fontSize: 18,
@@ -199,12 +199,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   optionalText: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#007BFF",
     fontWeight: "bold",
   },
   closeText: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#007BFF",
     fontWeight: "bold",
   },
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "bold",
   },
 });

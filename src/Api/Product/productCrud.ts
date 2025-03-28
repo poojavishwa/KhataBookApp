@@ -47,7 +47,7 @@ export const submitProduct = async (productData: any) => {
       productData,  
       {
         headers: {
-          "Content-Type": "application/json", 
+          "content-type":"multipart/form-data",
           Authorization: `Bearer ${token}`,
         },
       }

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { View, Text, Modal, TouchableOpacity, FlatList, TextInput, Image, StyleSheet } from "react-native";
 import { fetchProducts } from "../../Api/Product/productCrud";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { IMAGE_URL } from "../../constants/API_URL";
 import { fetchCustomers } from "../../Api/customer/customerCrud";
 
@@ -12,6 +12,7 @@ interface ProductSelectionModalProps {
 }
 
 const CustomerModal: React.FC<ProductSelectionModalProps> = ({ visible, onClose, onSelect }) => {
+    const navigation = useNavigation();
     const [customer, setCustomer] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const loadProducts = async () => {
@@ -35,7 +36,7 @@ const CustomerModal: React.FC<ProductSelectionModalProps> = ({ visible, onClose,
         <Modal visible={visible} animationType="slide" transparent>
             <View style={styles.modalBackground}>
                 <View style={styles.modalContainer}>
-                    
+
                     {/* Header */}
                     <View style={styles.header}>
                         <Text style={styles.headerTitle}>Add Party to your Invoice</Text>
@@ -45,26 +46,39 @@ const CustomerModal: React.FC<ProductSelectionModalProps> = ({ visible, onClose,
                     </View>
 
                     {/* Product List */}
-                    <FlatList
-                        data={customer}
-                        keyExtractor={(item) => item._id}
-                        style={{ marginTop: 10 }}
-                        renderItem={({ item }) => (
-                            <TouchableOpacity
-                            onPress={() => {
-                              onSelect(item);  // Pass the selected customer object
-                              onClose();       // Close the modal
-                            }}
-                            style={styles.productRow}
-                          >
-                            <Image source={require("../../assets/user.png")} style={styles.icon} />
-                            <View style={styles.productDetails}>
-                              <Text style={styles.productName}>{item.name}</Text>
-                              <Text style={styles.productName}>{item.phone}</Text>
+                    {customer.length > 0 ? (
+                        <FlatList
+                            data={customer}
+                            keyExtractor={(item) => item._id}
+                            style={{ marginTop: 10 }}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        onSelect(item);  // Pass the selected customer object
+                                        onClose();       // Close the modal
+                                    }}
+                                    style={styles.productRow}
+                                >
+                                    <Image source={require("../../assets/user.png")} style={styles.icon} />
+                                    <View style={styles.productDetails}>
+                                        <Text style={styles.productName}>{item.name}</Text>
+                                        <Text style={styles.productName}>{item.phone}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )}
+                        />
+                    ) : (
+                        <View style={[styles.emptyContainer]}>
+                            <View style={styles.centerContent}>
+                                <Text style={styles.emptyText}>No customers found.</Text>
+                                <TouchableOpacity onPress={() => navigation.navigate("Add Customer")}>
+                                    <Text style={{ color: "blue", marginTop: 6, fontSize: 14, textAlign: "center" }}>
+                                        + ADD NEW PARTY   </Text>
+                                </TouchableOpacity>
                             </View>
-                          </TouchableOpacity>
-    )}
-                    />
+                        </View>
+                    )
+                    }
                 </View>
             </View>
         </Modal>
@@ -112,9 +126,9 @@ const styles = StyleSheet.create({
     activeTab: {
         backgroundColor: "#007AFF",
     },
-    icon:{
-        width:30,
-        height:30,
+    icon: {
+        width: 30,
+        height: 30,
     },
     tabText: {
         color: "#007AFF",
@@ -146,12 +160,10 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
     productName: {
-        fontSize: 16,
-        fontWeight: "bold",
+        fontSize: 14,
     },
     productPrice: {
-        fontSize: 14,
-        color: "#007AFF",
+        fontSize: 12,
     },
     productStock: {
         fontSize: 14,
@@ -185,6 +197,31 @@ const styles = StyleSheet.create({
     addButtonText: {
         color: "#007AFF",
     },
+    emptyContainer: {
+        flex: 1,
+    justifyContent: "center",
+    alignItems: "center",   
+    },
+    emptyText: {
+        fontSize: 16,
+        color: "gray",
+        textAlign: "center",
+        marginBottom:10,
+    },
+    addCustomerButton: {
+        backgroundColor: "#007AFF",
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+    },
+    addCustomerText: {
+        color: "white",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    centerContent: {
+        alignItems: "center",
+      },
 });
 
 export default CustomerModal;

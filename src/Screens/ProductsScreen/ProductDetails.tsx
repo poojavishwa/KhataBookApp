@@ -25,7 +25,7 @@ const ProductDetails = () => {
   const [product, setProduct] = useState(null);
   const [logs, setLogs] = useState(null);
   const [loading, setLoading] = useState(true);
-  console.log("logs", logs)
+
   const loadProduct = async () => {
     setLoading(true);
     try {
@@ -46,7 +46,7 @@ const ProductDetails = () => {
 
   if (loading) {
     return (
-      <View style={styles.loaderContainer}>
+      <View style={styles.loader}>
         <ActivityIndicator size="large" color="#007BFF" />
       </View>
     );
@@ -54,8 +54,8 @@ const ProductDetails = () => {
 
   if (!product) {
     return (
-      <View style={styles.loaderContainer}>
-        <Text style={styles.errorText}>Product not found.</Text>
+      <View style={styles.loader}>
+        <Text>Product not found.</Text>
       </View>
     );
   }
@@ -99,7 +99,7 @@ const ProductDetails = () => {
             <Text style={styles.productName}>{product.name}</Text>
             {product.productImage ? (
               <Image
-                source={{ uri: `${IMAGE_URL}${product.productImage}` }}
+                source={{ uri: `${product.productImage}` }}
                 style={styles.productImage}
                 resizeMode="cover"
               />
@@ -112,28 +112,30 @@ const ProductDetails = () => {
 
           <View style={styles.detailRow}>
             <Text style={styles.label}>Sale Price:</Text>
-            <Text style={styles.value}>₹{product.sellingPrice}</Text>
+            <Text style={[styles.value, { flex: 1, textAlign: "right" }]}>₹{product.sellingPrice}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.label}>Purchase Price:</Text>
-            <Text style={styles.value}>₹{product.costPrice}</Text>
+            <Text style={[styles.value, { flex: 1, textAlign: "right" }]}>₹{product.costPrice}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.label}>Stock Quantity:</Text>
-            <Text style={styles.value}>{product.stock}</Text>
+            <Text style={[styles.value, { flex: 1, textAlign: "right" }]}>{product.stock}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.label}>GST Included:</Text>
-            <Text style={styles.value}>{product.gstIncluded ? "Yes" : "No"}</Text>
+            <Text style={[styles.value, { flex: 1, textAlign: "right" }]}>{product.gstIncluded ? "Yes" : "No"}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.label}>GST %:</Text>
-            <Text style={styles.value}>{product.gstPercentage} %</Text>
+            <Text style={[styles.value, { flex: 1, textAlign: "right" }]}>{product.gstPercentage} % </Text>
           </View>
         </View>
         <View style={styles.logs}>
           {loading ? (
+            <View style={styles.loader}>
             <ActivityIndicator size="large" color="#D32F2F" />
+          </View>
           ) : filteredLogs.length === 0 ? (
             <Text >No transactions found.</Text>
           ) : (
@@ -193,6 +195,11 @@ const ProductDetails = () => {
 };
 
 const styles = StyleSheet.create({
+  loader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   container: {
     flexGrow: 1,
     backgroundColor: "#F8F9FA",
@@ -257,14 +264,15 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
+    paddingHorizontal:10
   },
   label: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "bold",
     color: "#555",
   },
   value: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#333",
   },
   bottomButtons: {
@@ -279,7 +287,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: "48%",
     alignItems: "center",
-    fontSize:8,
+    fontSize:12,
   },
   stockOutButton: {
     backgroundColor: "#DC3545",
@@ -287,17 +295,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: "48%",
     alignItems: "center",
+    fontSize:12,
   },
   buttonText: {
     color: "#fff",
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "bold",
   },
   saveButton: { padding: 10, borderRadius: 5, alignItems: "center", marginTop: 10 },
   saveButtonActive: { backgroundColor: "#007bff" },
   saveButtonDisabled: { backgroundColor: "#ccc" },
   saveButtonText: { color: "#fff", fontWeight: "bold" },
-  deleteButtonText: { color: "#DC3545", fontWeight: "bold" ,fontSize:10},
+  deleteButtonText: { color: "#DC3545", fontWeight: "bold" ,fontSize:12},
   deleteButtonActive: { borderWidth: 2, borderColor: "#DC3545" },
   delelteBox: { marginHorizontal: 10, marginBottom: 10 },
   transactionItem: {
@@ -321,7 +330,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   transactionValue: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#555",
   },
   transactionDate: {

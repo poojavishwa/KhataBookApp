@@ -21,7 +21,6 @@ const ProductsTab = () => {
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-
   const openStockModal = (product, type) => {
     setSelectedProduct({ ...product, type });
     setModalVisible(true);
@@ -64,7 +63,7 @@ const ProductsTab = () => {
               >
                 <View style={styles.productCard}>
                   <Image
-                    source={{ uri: `${IMAGE_URL}${item.productImage}` }}
+                    source={{ uri: `${item.productImage}` }}
                     style={styles.productImage}
                     resizeMode="cover"
                   />
@@ -157,17 +156,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   productName: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "600",
     color: "#333",
   },
   productPrice: {
-    fontSize: 10,
+    fontSize: 12,
     color: "#007BFF",
     marginTop: 5,
   },
   productStock: {
-    fontSize: 10,
+    fontSize: 12,
     color: "#28A745",
     marginTop: 5,
   },
@@ -192,7 +191,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontWeight: "bold",
-    fontSize:10,
+    fontSize:12,
   },
   
 });

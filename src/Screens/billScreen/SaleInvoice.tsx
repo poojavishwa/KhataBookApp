@@ -67,14 +67,9 @@ const InvoiceScreen = () => {
   const halfGSTPercentage = totalGSTPercentage / 2;
   const halfGstAmount = totalGSTAmount / 2;
 
-  const getImageUri = (image: any) => {
-    const resolved = Image.resolveAssetSource(image);
-    return resolved?.uri?.startsWith("http") ? resolved.uri : `file://${resolved.uri}`;
-  };
-
-  const paidImageUri = getImageUri(require("../../assets/paid.png"));
-  const unpaidImageUri = getImageUri(require("../../assets/unpaid.png"));
-  console.log("customerDatasldkl;sk", customerData)
+  const paidImageUri = require("../../assets/paid.png");
+  const unpaidImageUri =require("../../assets/unpaid.png");
+  
   const shareInvoice = async () => {
     try {
       const filePath = await generatePDF(
@@ -141,10 +136,8 @@ const InvoiceScreen = () => {
             </View>
             <View>
               <View>
-                <Image
-                  source={paymentMethod === "Cash" || paymentMethod === "Online" ? { uri: paidImageUri } : { uri: unpaidImageUri }}
-                  style={styles.imageStyle}
-                />
+              <Image source={paymentMethod === "Cash" || paymentMethod === "Online" ? paidImageUri : unpaidImageUri} style={styles.imageStyle} />
+
                 {/* <Image source={require("../../assets/paid.png")} style={styles.imageStyle} /> */}
               </View>
             </View>

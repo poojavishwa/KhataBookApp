@@ -23,7 +23,7 @@ const SupplierHeader: React.FC<HeaderProps> = ({ title,name ,phone,getSupplierBy
                 </View>
             </View>
             <TouchableOpacity
-                style={{ marginRight: 15, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
+                style={{ marginRight: 15, marginTop:20, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
                 onPress={() => navigation.navigate("Update Supplier",{supplierById:getSupplierById})}
             >
                 <Image
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        height: 85,
+        height: 100,
         backgroundColor: "#fff",
         borderBottomWidth: 1,
         borderBottomColor: "#ddd",
@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         padding: 15,
+        marginTop:20,
       },
       backButton: {
         marginRight: 10,

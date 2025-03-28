@@ -113,12 +113,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   customerName: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "500",
     color: "#333",
   },
   customerphone:{
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "500",
     color: "gray",
   }

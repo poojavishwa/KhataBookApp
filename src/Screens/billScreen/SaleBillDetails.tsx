@@ -49,15 +49,15 @@ const SaleBillDetails = () => {
                         billData.items.map((item, index) => (
                           <View key={index} style={styles.selectedProductBox}>
                             <View style={{ flex: 1 }}>
-                              <Text style={{ fontSize: 12, fontWeight: "bold", color: "#333" }}>
+                              <Text style={{ fontSize: 14, fontWeight: "bold", color: "#333" }}>
                                 {item.productId.name}
                               </Text>
-                              <Text style={{ fontSize: 10, color: "#555" }}>
+                              <Text style={{ fontSize: 12, color: "#555" }}>
                                 {item.quantity} x ₹{item.price}
                               </Text>
                             </View>
                             <View>
-                              <Text style={{ fontSize: 12, fontWeight: "bold", color: "#007AFF" }}>
+                              <Text style={{ fontSize: 14, fontWeight: "bold", color: "#007AFF" }}>
                                 ₹{item.quantity * item.price}
                               </Text>
                             </View>
@@ -112,12 +112,12 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
       },
       customerName: {
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: "500",
         color: "#333",
       },
       customerphone: {
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: "500",
         color: "gray",
       },

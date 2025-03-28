@@ -15,55 +15,12 @@ export const PurchesePdfGenerate = async (
   const safeTotalGSTAmount = typeof totalGSTAmount === "number" ? totalGSTAmount : 0;
   const safeTotalPrice = typeof totalprice === "number" ? totalprice : 0;
 
-  const copyAssetToFileSystem = async (assetPath: string) => {
-    try {
-      const localFilePath = `${RNFS.CachesDirectoryPath}/${assetPath.split('/').pop()}`;
-      const assetUri = Image.resolveAssetSource(assetPath).uri;
-      // console.log("assetUri",assetUri);
-
-      // Check if the file exists before copying
-      const fileExists = await RNFS.exists(localFilePath);
-      if (!fileExists) {
-        await RNFS.copyFile(assetUri, localFilePath);
-      }
-
-      return localFilePath;
-    } catch (error) {
-      console.error("Error copying asset:", error);
-      return null;
-    }
-  };
-
-  const getBase64Image = async (imageUri) => {
-    try {
-      const response = await fetch(imageUri);
-      const blob = await response.blob();
-      const reader = new FileReader();
-
-      return new Promise((resolve, reject) => {
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.error("Error converting image to base64:", error);
-      return null;
-    }
-  };
-
-
-  const paidImagePath = Image.resolveAssetSource(require("../assets/paid.png")).uri;
-  const unpaidImagePath = Image.resolveAssetSource(require("../assets/unpaid.png")).uri;
-  // console.log("unpaidImagePath",unpaidImagePath);
-  // console.log("paidImagePath",paidImagePath);
-
-  const paidImageBase64 = await getBase64Image(paidImagePath);
-  const unpaidImageBase64 = await getBase64Image(unpaidImagePath);
-
-  const selectedImageBase64 = paymentMethod === "Cash" || paymentMethod === "Online" ? paidImageBase64 : unpaidImageBase64;
-
-  const filePath = `${RNFS.DownloadDirectoryPath}/invoice_${billNumber}.pdf`;
-
+  const paidImageUrl = "https://res.cloudinary.com/dpbx63xbs/image/upload/v1743071474/b1gxpxky2f6our77uwj6.png";
+  const unpaidImageUrl = "https://res.cloudinary.com/dpbx63xbs/image/upload/v1743071474/xraxi7glabfbmqjj9xus.png";
+  
+  const selectedImageBase64 = paymentMethod === "Cash" || paymentMethod === "Online"
+    ? paidImageUrl
+    : unpaidImageUrl
   try {
 
     const htmlContent = `

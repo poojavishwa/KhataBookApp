@@ -9,7 +9,8 @@ import { useNavigation } from "@react-navigation/native";
 import { showToast } from "../../constants/showToast";
 
 const UpdateProduct = ({ route }) => {
-  const { loading } = useProductForm();
+  // const { loading } = useProductForm();
+  const [loading, setLoading] = useState(false);
   const { product } = route.params; 
   const navigation = useNavigation();
   const [itemName, setItemName] = useState("");
@@ -33,7 +34,7 @@ const UpdateProduct = ({ route }) => {
       setSelectedUnit(product.unit || "kg");
       setGstIn(product.gstPercentage ? product.gstPercentage.toString() : "");
       if (product.productImage) {
-        setImageUri(`${IMAGE_URL}${product.productImage}`);
+        setImageUri(`${product.productImage}`);
       }
     }
   }, [product]);
@@ -64,31 +65,42 @@ const UpdateProduct = ({ route }) => {
   };
 
   const handleUpdate = async () => {
-    const updatedProduct = {
-      productId: product._id,
-      name: itemName,
-      sellingPrice: Number(salePrice) || 0,  
-      costPrice: Number(purchasePrice) || 0,
-      stock: Number(openingStock) || 0,
-      lowStockAlert: Number(lowStockAlert) || 0,
-      gstPercentage: Number(gstIn) || 0,
-      selectedUnit,
-      gstIncluded: taxIncluded,
-      unit: selectedUnit,
-    };
-  
     try {
-      const result = await submitProduct(updatedProduct);
-      showToast("success","Success", "Product updated successfully!");
-      fetchProductById(product._id)
-      navigation.goBack()
-    } catch (error) { 
-      showToast("error","Error", "Failed to update product.");
+      setLoading(true);
+      let formData = new FormData();
+  
+      formData.append("productId", String(product._id));
+      formData.append("name", itemName);
+      formData.append("sellingPrice", salePrice ? salePrice.toString() : "0");
+      formData.append("costPrice", purchasePrice ? purchasePrice.toString() : "0");
+      formData.append("stock", openingStock ? openingStock.toString() : "0");
+      formData.append("lowStockAlert", lowStockAlert ? lowStockAlert.toString() : "0");
+      formData.append("gstPercentage", gstIn ? gstIn.toString() : "0");
+      formData.append("gstIncluded", taxIncluded ? "true" : "false");
+      formData.append("unit", selectedUnit);
+    
+      if (imageUri) {
+        formData.append("file", {
+          uri: imageUri,
+          name: "product.jpg",
+          type: "image/jpeg",
+        } as any);
+      }
+      const result = await submitProduct(formData);
+      
+      console.log("✅ Update Successful", result);
+      showToast("success", "Success", "Product updated successfully!");
+      
+      fetchProductById(product._id);
+      navigation.goBack();
+    } catch (error) {
+      showToast("error", "Error", "Failed to update product.");
+    } finally {
+      setLoading(false);
     }
   };
-
-
   
+
 
   return (
     <>
@@ -193,7 +205,7 @@ const UpdateProduct = ({ route }) => {
           disabled={loading}
           onPress={handleUpdate}
         >
-          <Text style={styles.saveButtonText}>{loading ? "Updating..." : "UPDATE ITEM"}</Text>
+          <Text style={styles.saveButtonText}>{loading ? "Updating..." : "Update Item"}</Text>
         </TouchableOpacity>
         </View>
     </>
@@ -207,19 +219,19 @@ const styles = StyleSheet.create({
   image: { width: 70, height: 70, borderRadius: 5, alignSelf: "center", marginTop: 10 },
   switchRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginVertical: 10 },
   dropdownContainer: { marginBottom: 10 },
-  dropdownLabel: { fontSize: 12, marginBottom: 4, fontWeight: "500" },
+  dropdownLabel: { fontSize: 14, marginBottom: 4, fontWeight: "500" },
   saveButton: { padding: 10, borderRadius: 5, alignItems: "center", marginTop: 10 },
   saveButtonActive: { backgroundColor: "#007bff" },
   saveButtonDisabled: { backgroundColor: "#ccc" },
-  saveButtonText: { color: "#fff", fontWeight: "bold",fontSize:12  },
+  saveButtonText: { color: "#fff", fontWeight: "bold",fontSize:14  },
   pickerContainer: { borderWidth: 1, borderColor: "#ccc", borderRadius: 6,  height: 30, // Reduced height
     overflow: "hidden",
     justifyContent: "center", },
   picker: { height: 45, width: "100%" },
   gridContainer: { flexDirection: "row",flexWrap: "wrap", justifyContent: "space-between", marginBottom: 10 },
   gridItem: { width: "48%" },
-  label: { fontSize: 12, fontWeight: "bold", marginBottom: 5, color: "#333" },
-  input: { borderWidth: 1, borderColor: "#ccc", padding: 6, borderRadius: 5, backgroundColor: "#fff", marginBottom: 10, fontSize:10, },
+  label: { fontSize: 14, fontWeight: "bold", marginBottom: 5, color: "#333" },
+  input: { borderWidth: 1, borderColor: "#ccc", padding: 6, borderRadius: 5, backgroundColor: "#fff", marginBottom: 10, fontSize:12, },
   buttonBox:{margin:10},
   deleteButtonActive: { backgroundColor: "#DC3545" },
 });

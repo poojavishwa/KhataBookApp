@@ -23,7 +23,7 @@ const ProductHeader: React.FC<HeaderProps> = ({ title, product }) => {
                 <Text style={styles.title}>{title}</Text>
             </View>
             <TouchableOpacity
-                style={{ marginRight: 15, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
+                style={{ marginRight: 15,marginTop:20, flexDirection: "row", justifyContent: "center", alignItems: "center" }}
                 onPress={() => navigation.navigate("Update Product", { product: product })}
             >
                 <Image
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        height: 85,
+        height: 100,
         backgroundColor: "#fff",
         borderBottomWidth: 1,
         borderBottomColor: "#ddd",
@@ -51,6 +51,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         padding: 15,
+        marginTop:20
       },
       backButton: {
         marginRight: 10,
