@@ -161,7 +161,7 @@ const UpdatePurcheseBill = () => {
                   <Text style={{ color: "white", fontSize: 12 }}>Updated Bill    </Text>
                 )}
               </TouchableOpacity>
-            </View>
+      </View>
       <ProductPurcheseModal visible={modalVisible} onClose={() => setModalVisible(false)}
        selectedProducts={selectedProducts} 
        onSelect={(products) => setSelectedProducts(products)}

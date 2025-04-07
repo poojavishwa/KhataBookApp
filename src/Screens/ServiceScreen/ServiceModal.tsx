@@ -3,24 +3,25 @@ import { View, Text, Modal, TouchableOpacity, FlatList, TextInput, Image, StyleS
 import { fetchProducts } from "../../Api/Product/productCrud";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { IMAGE_URL } from "../../constants/API_URL";
+import { fetchServices } from "../../Api/service/serviceCrud";
 
 interface ProductSelectionModalProps {
     visible: boolean;
     onClose: () => void;
     onSelect: (product: string, quantity: number) => void;
-    selectedProducts?: { productId: string; quantity: number }[];
+    selectedProducts?: { serviceId: string; quantity: number }[];
 }
 
-const ProductModal: React.FC<ProductSelectionModalProps> = ({ visible,onClose, onSelect, selectedProducts }) => {
+const ServiceModal: React.FC<ProductSelectionModalProps> = ({ visible, onClose, onSelect, selectedProducts }) => {
     const navigation = useNavigation();
-    const [products, setProducts] = useState<any[]>([]);
+    const [service, setService] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [cart, setCart] = useState<{ [key: string]: number }>({});
     const loadProducts = async () => {
         setLoading(true);
         try {
-            const data = await fetchProducts();
-            setProducts(data);
+            const data = await fetchServices();
+            setService(data);
         } catch (error) {
             console.error("Error fetching products:", error);
         }
@@ -29,29 +30,24 @@ const ProductModal: React.FC<ProductSelectionModalProps> = ({ visible,onClose, o
 
     useFocusEffect(
         useCallback(() => {
-          loadProducts();
-          if (selectedProducts && selectedProducts.length > 0) {
-            const initialCart = selectedProducts.reduce((acc, product) => {
-              acc[product.productId] = product.quantity;
-              return acc;
-            }, {} as { [key: string]: number });
-      
-            setCart(initialCart);
-          } else {
-            setCart({}); // Reset cart when there are no selected products
-          }
+            loadProducts();
+            if (selectedProducts) {
+                const initialCart = selectedProducts.reduce((acc, service) => {
+                    acc[service.serviceId] = service.quantity;
+                    return acc;
+                }, {} as { [key: string]: number });
+                setCart(initialCart);
+            }
         }, [selectedProducts])
-      );
-      
+    );
 
 
     return (
                 <View style={styles.modalContainer}>
-                    {/* Product List */}
-                    {products.length > 0 ? (
+                    {service.length > 0 ? (
                         <>
                             <FlatList
-                                data={products}
+                                data={service}
                                 keyExtractor={(item) => item._id}
                                 style={{ marginTop: 10 }}
                                 renderItem={({ item }) => {
@@ -59,12 +55,11 @@ const ProductModal: React.FC<ProductSelectionModalProps> = ({ visible,onClose, o
 
                                     return (
                                         <View style={styles.productRow}>
-                                            <Image source={{ uri: `${item.productImage}` }} style={styles.productImage} />
+                                            <Image source={{ uri: `${item.serviceImage}` }} style={styles.productImage} />
 
                                             <View style={styles.productDetails}>
-                                                <Text style={styles.productName}>{item.name}</Text>
-                                                <Text style={styles.productPrice}>Sale Price: ₹{item.sellingPrice}</Text>
-                                                <Text style={styles.productStock}>Stock: {item.stock}</Text>
+                                                <Text style={styles.productName}>{item.serviceName}</Text>
+                                                <Text style={styles.productPrice}>Service Price: ₹{item.servicePrice}</Text>
                                             </View>
 
                                             {/* Quantity Selector */}
@@ -109,25 +104,24 @@ const ProductModal: React.FC<ProductSelectionModalProps> = ({ visible,onClose, o
                             />
                             <View style={styles.buttonBox}>
                                 <View style={styles.totalText}>
-                                    <Text>Total   </Text>
+                                    <Text>Total  </Text>
                                     <Text style={{ fontSize: 16, fontWeight: "bold", color: "#007AFF" }}>
-                                        ₹{Object.keys(cart).reduce((total, productId) => {
-                                            const product = products.find((p) => p._id === productId);
-                                            return total + (cart[productId] * (product ? product.sellingPrice : 0));
+                                        ₹{Object.keys(cart).reduce((total, serviceId) => {
+                                            const product = service.find((p) => p._id === serviceId);
+                                            return total + (cart[serviceId] * (product ? product.servicePrice : 0));
                                         }, 0)}
                                     </Text>
                                 </View>
                                 <TouchableOpacity style={styles.continueButton}
                                     onPress={() => {
-                                        const selectedItems = Object.keys(cart).map((productId) => {
-                                            const product = products.find((p) => p._id === productId);
+                                        const selectedItems = Object.keys(cart).map((serviceId) => {
+                                            const product = service.find((p) => p._id === serviceId);
                                             return {
-                                                productId: productId,
-                                                name: product.name,
-                                                quantity: cart[productId],
-                                                price: product.sellingPrice,
+                                                serviceId: serviceId,
+                                                name: product.serviceName,
+                                                quantity: cart[serviceId],
+                                                price: product.servicePrice,
                                                 gstPercentage: product.gstPercentage,
-                                                costPrice: product.costPrice,
                                             };
                                         });
                                         onSelect(selectedItems); // Send selected items to SaleBillScreen
@@ -152,6 +146,7 @@ const ProductModal: React.FC<ProductSelectionModalProps> = ({ visible,onClose, o
                         </View>
                     )}
                 </View>
+            
     );
 };
 
@@ -267,6 +262,7 @@ const styles = StyleSheet.create({
     },
     continueButton: {
         margin: 8,
+        marginTop:20,
         alignItems: "center",
         backgroundColor: "blue",
         padding: 10,
@@ -277,6 +273,7 @@ const styles = StyleSheet.create({
         color: "white",
     },
     buttonBox: {
+        marginBottom:10,
         width: "100%",
         flexDirection: "row",
         justifyContent: "space-between",
@@ -313,4 +310,4 @@ const styles = StyleSheet.create({
       },
 });
 
-export default ProductModal;
+export default ServiceModal;

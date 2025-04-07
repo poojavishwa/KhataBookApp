@@ -7,6 +7,8 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { addCustomer } from "../../Api/customer/customerCrud";
@@ -67,6 +69,10 @@ const CreateCustomer = () => {
 
 
   return (
+    <KeyboardAvoidingView
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    style={{ flex: 1 }}
+    >
     <ScrollView style={styles.container}>
       <TextInput
         style={styles.input}
@@ -159,6 +165,7 @@ const CreateCustomer = () => {
         )}
       </TouchableOpacity>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 

@@ -5,10 +5,12 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { DeleteById, UpdateBillById } from "../../Api/billCrud/BillCrud";
 import ProductModal from "../ProductsScreen/ProductSaleModal";
 import { showToast } from "../../constants/showToast";
+import ProductServiceModal from "./ProductServiceTab";
 
 const UpdateSaleBill = () => {
   const route = useRoute();
   const { saleBillData } = route.params as { saleBillData: any };
+  console.log("saleBillData",saleBillData)
   const navigation = useNavigation();
   const [billNumber, setBillNumber] = useState(1);
   const [date, setDate] = useState(new Date());
@@ -19,82 +21,117 @@ const UpdateSaleBill = () => {
   const [customerModalVisible, setCustomerModalVisible] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<any>("");
   const [isSaving, setIsSaving] = useState(false);
-  useEffect(() => {
-    if (saleBillData && Object.keys(saleBillData).length > 0) {
-      setBillNumber(saleBillData.BillNumber || "1");
-      setDate(saleBillData.Date ? new Date(saleBillData.Date) : new Date());
-      setSelectedProducts(
-        Array.isArray(saleBillData.items)
-          ? saleBillData.items.map((item) => ({
-              name: item.productName || item.productId?.name || "Unnamed Product",
-              quantity: item.quantity || 1,
-              price: item.price || 0,
-              productId: item.productId?._id || "",
-            }))
-          : []
-      );
-      setPaymentMethod(saleBillData.paymentStatus || "Cash");
-      setSelectedCustomer(saleBillData.customerId || "");
-    }
-  }, [saleBillData]);
+
+ useEffect(() => {
+  if (saleBillData && Object.keys(saleBillData).length > 0) {
+    setBillNumber(saleBillData.BillNumber || "1");
+    setDate(saleBillData.Date ? new Date(saleBillData.Date) : new Date());
+
+    // Extract products from `items` array
+    const formattedItems = Array.isArray(saleBillData.items)
+      ? saleBillData.items.map((item) => ({
+          name: item.productName || item.productId?.name || "Unnamed Product",
+          quantity: item.quantity || 1,
+          price: item.price || 0,
+          productId: item.productId?._id || "",
+          isService: false, // Mark as a product
+        }))
+      : [];
+
+    // Extract services from `services` array
+    const formattedServices = Array.isArray(saleBillData.services)
+      ? saleBillData.services.map((service) => ({
+          name: service.serviceName || service.serviceId?.serviceName || "Unnamed Service",
+          quantity: service.quantity || 1,
+          price: service.price || 0,
+          serviceId: service.serviceId?._id || service._id || "",
+          isService: true, // Mark as a service
+        }))
+      : [];
+
+    // Merge both lists (products + services)
+    setSelectedProducts([...formattedItems, ...formattedServices]);
+
+    setPaymentMethod(saleBillData.paymentStatus || "Cash");
+    setSelectedCustomer(saleBillData.customerId || "");
+  }
+}, [saleBillData]);
+
+  
 
   const totalAmount = selectedProducts.reduce((total, item) => total + item.quantity * item.price, 0);
   const billId = saleBillData._id;
 
- const updateBill = async () => {
-  setIsSaving(true);
-
-  if (!billId) {
-    showToast("error","Error", "Invalid Bill ID. Unable to update.");
-    setIsSaving(false);
-    return;
-  }
-
-  if (!selectedCustomer || !selectedCustomer._id) {
-    showToast("error","Error", "Please select a customer.");
-    setIsSaving(false);
-    return;
-  }
-
-  if (selectedProducts.length === 0) {
-    showToast("error","Error", "Please select at least one product.");
-    setIsSaving(false);
-    return;
-  }
-
-  // Format date before sending
-  const formattedDate = date.toISOString().split("T")[0]; // Converts to "YYYY-MM-DD"
-
-  const billData = {
-    billNumber,
-    date: formattedDate, 
-    saleBillAmount:totalAmount,
-    items: selectedProducts.map((item) => ({
-      productId: item.productId,
-      quantity: item.quantity,
-      price: item.price,
-    })),
-    paymentStatus:paymentMethod,
-  };
-
-  try {
-    await UpdateBillById(billData, billId);
-    showToast("success","Success", "Bill updated successfully!");
-    navigation.navigate("Sale Invoice", {
-      billId,
+  const updateBill = async () => {
+    setIsSaving(true);
+  
+    if (!billId) {
+      showToast("error", "Error", "Invalid Bill ID. Unable to update.");
+      setIsSaving(false);
+      return;
+    }
+  
+    if (!selectedCustomer || !selectedCustomer._id) {
+      showToast("error", "Error", "Please select a customer.");
+      setIsSaving(false);
+      return;
+    }
+  
+    if (selectedProducts.length === 0) {
+      showToast("error", "Error", "Please select at least one product or service.");
+      setIsSaving(false);
+      return;
+    }
+  
+    // Format date before sending
+    const formattedDate = date.toISOString().split("T")[0]; // Converts to "YYYY-MM-DD"
+  
+    // **Separate products and services**
+    const items = selectedProducts
+      .filter((item) => item.productId) // Only products
+      .map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+  
+    const services = selectedProducts
+      .filter((item) => item.serviceId) // Only services
+      .map((service) => ({
+        serviceId: service.serviceId,
+        quantity: service.quantity,
+        price: service.price,
+      }));
+  
+    const billData = {
       billNumber,
-      date: formattedDate, // Use formatted date here too
-      selectedCustomer,
-      selectedProducts,
-      totalAmount,
-      paymentMethod,
-    });
-  } catch (error) {
-    showToast("error","Error", "Failed to update the bill. Please try again.");
-  } finally {
-    setIsSaving(false);
-  }
-};
+      date: formattedDate,
+      saleBillAmount: totalAmount,
+      items, // Products array
+      services, // Services array
+      paymentStatus: paymentMethod,
+    };
+  
+    try {
+      await UpdateBillById(billData, billId);
+      showToast("success", "Success", "Bill updated successfully!");
+      navigation.navigate("Sale Invoice", {
+        billId,
+        billNumber,
+        date: formattedDate,
+        selectedCustomer,
+        selectedProducts,
+        totalAmount,
+        paymentMethod,
+      });
+    } catch (error) {
+      console.error("Update Bill Error:", error);
+      showToast("error", "Error", "Failed to update the bill. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
 
 
 
@@ -165,7 +202,7 @@ const UpdateSaleBill = () => {
                 )}
               </TouchableOpacity>
             </View>
-      <ProductModal visible={modalVisible} onClose={() => setModalVisible(false)}
+      <ProductServiceModal visible={modalVisible} onClose={() => setModalVisible(false)}
        selectedProducts={selectedProducts} 
        onSelect={(products) => setSelectedProducts(products)}
        />

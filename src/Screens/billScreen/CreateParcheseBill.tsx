@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, TouchableOpacity, Alert, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TextInput, Button, TouchableOpacity, Alert, StyleSheet, ActivityIndicator, Image } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation } from "@react-navigation/native";
@@ -9,6 +9,7 @@ import SupplierModal from "../supplierScreen/SupplierModal";
 import { showToast } from "../../constants/showToast";
 import { AdEventType, InterstitialAd, TestIds } from "react-native-google-mobile-ads";
 import { ScrollView } from "react-native-gesture-handler";
+import EditPurcheseBillNumberModal from "./EditPurcheseBillNumberModal";
 
 
 const adUnitId = __DEV__ ? TestIds.INTERSTITIAL : 'ca-app-pub-9070914924630643/6032809894';
@@ -20,6 +21,7 @@ const CreatePurcheseScreen = () => {
   const navigation = useNavigation();
   const [billNumber, setBillNumber] = useState(1);
   const [date, setDate] = useState(new Date());
+  const [isModalVisible1, setModalVisible1] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<{ name: string; quantity: number; costPrice: number }[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("Cash");
@@ -28,16 +30,15 @@ const CreatePurcheseScreen = () => {
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isAdLoaded, setIsAdLoaded] = useState(false);
-
+  const [prefix, setPrefix] = useState("");
 
   useEffect(() => {
     const getSaleBills = async () => {
       try {
         const data = await fetchPurchaseBillNo();
-      const maxBillNumber = data?.lastBillNumber ? parseInt(data.lastBillNumber, 10) : 0;
-      console.log("Last Bill Number:", maxBillNumber);
-      
-      setBillNumber(maxBillNumber + 1);
+        const maxBillNumber = data?.lastBillNumber 
+        setBillNumber(parseInt(maxBillNumber, 10) + 1);
+        setPrefix(data?.prefix)
       } catch (error) {
         console.error("Error fetching sale bills:", error);
       }
@@ -56,6 +57,13 @@ const CreatePurcheseScreen = () => {
   }, []);
 
   const totalAmount = selectedProducts.reduce((total, item) => total + item.quantity * item.costPrice, 0);
+
+  const handleUpdateBillNumber = (newBillNumber: string, newPrefix: string) => {
+    setBillNumber(newBillNumber);
+    setPrefix(newPrefix);
+  };
+
+  // const fullBillNumber = prefix ? `${prefix}${billNumber}` : billNumber;
 
   const saveBill = async () => {
     setIsSaving(true);
@@ -78,8 +86,10 @@ const CreatePurcheseScreen = () => {
           quantity: item.quantity,
           price: item.costPrice,
         })),
-        paymentMethod
+        paymentMethod,
+        prefix
       );
+      console.log(billNumber,prefix)
       if (isAdLoaded) {
         interstitial.show();
         interstitial.addAdEventListener(AdEventType.CLOSED, () => {
@@ -89,7 +99,8 @@ const CreatePurcheseScreen = () => {
             selectedCustomer,
             selectedProducts,
             totalAmount,
-            paymentMethod
+            paymentMethod,
+            prefix
           });
           interstitial.load();
         });
@@ -102,6 +113,7 @@ const CreatePurcheseScreen = () => {
           selectedProducts,
           totalAmount,
           paymentMethod,
+          prefix
         });
       }
 
@@ -116,133 +128,141 @@ const CreatePurcheseScreen = () => {
 
   return (
     <>
-    <ScrollView>
-      <View style={{ padding: 20 }}>
-        {/* Sale Bill Number and Date in One Row */}
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 5 }}>
-          {/* Sale Bill Number */}
-          <View>
-            <Text style={{ fontSize: 14 }}>Sale Bill Number:     </Text>
-            <Text style={{ fontSize: 12, fontWeight: "bold", borderWidth: 1,borderColor:"#D0DDD0", padding: 8 }}>{billNumber}</Text>
-          </View>
-
-          {/* Date Picker */}
-          <View>
-            <Text style={{ fontSize: 14 }}>Select Date:     </Text>
-            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, padding: 8,borderColor:"#D0DDD0" }}>
-              <Text style={{ fontSize: 12, marginLeft: 5 }}>{date.toDateString()}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {showDatePicker && (
-          <DateTimePicker
-            value={date}
-            mode="date"
-            display="default"
-            onChange={(event, selectedDate) => {
-              setShowDatePicker(false);
-              if (selectedDate) setDate(selectedDate);
-            }}
-          />
-        )}
-
-        {/* Bill To (Search Party) */}
-        <Text style={{ fontSize: 14, marginTop: 10 }}>Bill To:</Text>
-        <TouchableOpacity
-          onPress={() => setCustomerModalVisible(true)}
-          style={{ borderWidth: 1, padding: 10, marginTop: 5, borderRadius: 5,borderColor:"#D0DDD0"  }}
-        >
-          <Text style={{fontSize: 12, color: "#777" }}>{selectedCustomer.name || "Select a Supplier"}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Add Supplier")}>
-          <Text style={{ color: "blue", marginTop: 6,fontSize:12  }}>+ ADD NEW PARTY</Text>
-        </TouchableOpacity>
-
-        {/* Items Section */}
-        <Text style={{ fontSize: 14, marginTop: 10 }}>Items:</Text>
-        <TouchableOpacity
-          onPress={() => setModalVisible(true)}
-          style={{
-            borderWidth: 1,
-            borderColor: "#D0DDD0",
-            padding: 10,
-            marginTop: 5,
-            borderRadius: 5,
-          }}
-        >
-          {selectedProducts.length > 0 ? (
-            selectedProducts.map((item, index) => (
-              <View key={index} style={styles.selectedProductBox}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 12, fontWeight: "bold", color: "#333" }}>
-                    {item.name}
-                  </Text>
-                  <Text style={{ fontSize: 12, color: "#555" }}>
-                    {item.quantity} x ₹{item.costPrice}
-                  </Text>
-                </View>
-                <View>
-                  <Text style={{ fontSize: 12, fontWeight: "bold", color: "#007AFF" }}>
-                    ₹{item.quantity * item.costPrice}
-                  </Text>
-                </View>
+      <ScrollView>
+        <View style={{ padding: 20 }}>
+          {/* Sale Bill Number and Date in One Row */}
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 5 }}>
+            {/* Sale Bill Number */}
+            <View>
+              <Text style={{ fontSize: 14 }}>Sale Bill Number:     </Text>
+              <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                <Text style={{ fontSize: 12, fontWeight: "bold", width: 100, borderWidth: 1, borderColor: "#D0DDD0", padding: 8 }}>{prefix}{billNumber}</Text>
+                <TouchableOpacity onPress={() => setModalVisible1(true)} style={{ marginLeft: 5 }}>
+                  <Image
+                    source={require("../../assets/edit.png")}
+                    style={{ width: 30, height: 30 }}
+                  />
+                </TouchableOpacity>
               </View>
-            ))
-          ) : (
-            <Text style={{ fontSize: 12, color: "#777" }}>Select a Product</Text>
-          )}
-        </TouchableOpacity>
+            </View>
 
-        <TouchableOpacity onPress={() => navigation.navigate("Add Product")}>
-          <Text style={{ color: "blue", marginTop: 6,fontSize:14}}>+ ADD NEW ITEM</Text>
-        </TouchableOpacity>
+            {/* Date Picker */}
+            <View>
+              <Text style={{ fontSize: 14 }}>Select Date:     </Text>
+              <TouchableOpacity onPress={() => setShowDatePicker(true)} style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, padding: 8, borderColor: "#D0DDD0" }}>
+                <Text style={{ fontSize: 12, marginLeft: 5 }}>{date.toDateString()}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            marginTop: 10,
-            marginBottom: 10,
-            borderWidth: 1,
-            padding: 10,
-            borderColor: "#D0DDD0"
-          }}>
-          <Text style={{ fontSize: 14, fontWeight: "bold" }}>Purchase Bill Amount:</Text>
-          <Text style={{ fontSize: 14, fontWeight: "bold", color: "green" }}>
-            ₹{selectedProducts.reduce((total, item) => total + item.quantity * item.costPrice, 0)}
-          </Text>
-        </View>
-        {/* Payment Method Selection */}
-        <Text style={{ fontSize: 14, fontWeight: "bold", marginTop: 10 }}>Payment Method:</Text>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
-          {["Cash", "Unpaid", "Online"].map((method) => (
-            <TouchableOpacity
-              key={method}
-              onPress={() => setPaymentMethod(method)}
-              style={[
-                styles.radioButton,
-                paymentMethod === method && styles.radioButtonSelected,
-              ]}
-            >
-              <Text style={{ color: paymentMethod === method ? "#fff" : "#000" }}>{method}   </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-      <View style={styles.bottomButtonContainer}>
-        <TouchableOpacity
-          style={[styles.actionButton, isSaving && { backgroundColor: "#999" }]}
-          onPress={saveBill}
-          disabled={isSaving} // Disable when saving
-        >
-          {isSaving ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={{ color: "white", fontSize: 14 }}>Save Bill   </Text>
+          {showDatePicker && (
+            <DateTimePicker
+              value={date}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+                if (selectedDate) setDate(selectedDate);
+              }}
+            />
           )}
-        </TouchableOpacity>
-      </View>
+
+          {/* Bill To (Search Party) */}
+          <Text style={{ fontSize: 14, marginTop: 10 }}>Bill To:</Text>
+          <TouchableOpacity
+            onPress={() => setCustomerModalVisible(true)}
+            style={{ borderWidth: 1, padding: 10, marginTop: 5, borderRadius: 5, borderColor: "#D0DDD0" }}
+          >
+            <Text style={{ fontSize: 12, color: "#777" }}>{selectedCustomer.name || "Select a Supplier"}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("Add Supplier")}>
+            <Text style={{ color: "blue", marginTop: 6, fontSize: 12 }}>+ ADD NEW PARTY</Text>
+          </TouchableOpacity>
+
+          {/* Items Section */}
+          <Text style={{ fontSize: 14, marginTop: 10 }}>Items:</Text>
+          <TouchableOpacity
+            onPress={() => setModalVisible(true)}
+            style={{
+              borderWidth: 1,
+              borderColor: "#D0DDD0",
+              padding: 10,
+              marginTop: 5,
+              borderRadius: 5,
+            }}
+          >
+            {selectedProducts.length > 0 ? (
+              selectedProducts.map((item, index) => (
+                <View key={index} style={styles.selectedProductBox}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 12, fontWeight: "bold", color: "#333" }}>
+                      {item.name}
+                    </Text>
+                    <Text style={{ fontSize: 12, color: "#555" }}>
+                      {item.quantity} x ₹{item.costPrice}
+                    </Text>
+                  </View>
+                  <View>
+                    <Text style={{ fontSize: 12, fontWeight: "bold", color: "#007AFF" }}>
+                      ₹{item.quantity * item.costPrice}
+                    </Text>
+                  </View>
+                </View>
+              ))
+            ) : (
+              <Text style={{ fontSize: 12, color: "#777" }}>Select a Product</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate("Add Product")}>
+            <Text style={{ color: "blue", marginTop: 6, fontSize: 14 }}>+ ADD NEW ITEM</Text>
+          </TouchableOpacity>
+
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginTop: 10,
+              marginBottom: 10,
+              borderWidth: 1,
+              padding: 10,
+              borderColor: "#D0DDD0"
+            }}>
+            <Text style={{ fontSize: 14, fontWeight: "bold" }}>Purchase Bill Amount:</Text>
+            <Text style={{ fontSize: 14, fontWeight: "bold", color: "green" }}>
+              ₹{selectedProducts.reduce((total, item) => total + item.quantity * item.costPrice, 0)}
+            </Text>
+          </View>
+          {/* Payment Method Selection */}
+          <Text style={{ fontSize: 14, fontWeight: "bold", marginTop: 10 }}>Payment Method:</Text>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
+            {["Cash", "Unpaid", "Online"].map((method) => (
+              <TouchableOpacity
+                key={method}
+                onPress={() => setPaymentMethod(method)}
+                style={[
+                  styles.radioButton,
+                  paymentMethod === method && styles.radioButtonSelected,
+                ]}
+              >
+                <Text style={{ color: paymentMethod === method ? "#fff" : "#000" }}>{method}   </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+        <View style={styles.bottomButtonContainer}>
+          <TouchableOpacity
+            style={[styles.actionButton, isSaving && { backgroundColor: "#999" }]}
+            onPress={saveBill}
+            disabled={isSaving} // Disable when saving
+          >
+            {isSaving ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={{ color: "white", fontSize: 14 }}>Save Bill   </Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </ScrollView>
       <ProductPurcheseModal
         visible={modalVisible}
@@ -253,6 +273,13 @@ const CreatePurcheseScreen = () => {
         visible={customerModalVisible}
         onClose={() => setCustomerModalVisible(false)}
         onSelect={(customer) => setSelectedCustomer(customer)}
+      />
+      <EditPurcheseBillNumberModal
+        isVisible={isModalVisible1}
+        onClose={() => setModalVisible1(false)}
+        billNumber={billNumber}
+        prefix={prefix}
+        setBillDetails={handleUpdateBillNumber}
       />
     </>
   );
@@ -266,7 +293,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#f8f9fa", // Light gray background
     padding: 6,
-    borderRadius:5,
+    borderRadius: 5,
     borderWidth: 1,
     borderColor: "#ddd",
     shadowColor: "#000",
@@ -288,7 +315,7 @@ const styles = StyleSheet.create({
     borderColor: "#007AFF",
   },
   bottomButtonContainer: {
-    marginHorizontal:20,
+    marginHorizontal: 20,
     bottom: 20,
     paddingVertical: 10,
     borderRadius: 5,

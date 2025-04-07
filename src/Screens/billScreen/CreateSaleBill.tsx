@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, TouchableOpacity, Alert, StyleSheet, ActivityIndicator, Dimensions } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { View, Text, TouchableOpacity, Alert, StyleSheet, ActivityIndicator, Dimensions, Image } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation } from "@react-navigation/native";
 import CustomerModal from "../customerScreen/CustomerModal";
-import { fetchSaleBill, fetchSaleBillNo, saveBillToServer } from "../../Api/billCrud/BillCrud";
+import { fetchSaleBillNo, saveBillToServer } from "../../Api/billCrud/BillCrud";
 import ProductModal from "../ProductsScreen/ProductSaleModal";
 import { AdEventType, InterstitialAd, TestIds } from "react-native-google-mobile-ads";
 import { showToast } from "../../constants/showToast";
 import { ScrollView } from "react-native-gesture-handler";
+import EditSaleBillNumberModal from "./EditSaleBillNumberModal";
+import ProductServiceModal from "./ProductServiceTab";
 
 const { height } = Dimensions.get('window');
 const adUnitId = __DEV__ ? TestIds.INTERSTITIAL : 'ca-app-pub-9070914924630643/6032809894';
@@ -20,6 +21,7 @@ const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
 const SaleBillScreen = () => {
   const navigation = useNavigation();
   const [billNumber, setBillNumber] = useState(1);
+  const [isModalVisible1, setModalVisible1] = useState(false);
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<{ name: string; quantity: number; price: number }[]>([]);
@@ -29,18 +31,17 @@ const SaleBillScreen = () => {
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isAdLoaded, setIsAdLoaded] = useState(false);
-  // const [saleBills, setSaleBills] = useState([]);
-  // console.log("billNumber", billNumber)
+  const [prefix, setPrefix] = useState("");
+  const [isService, setIsService] = useState(false); 
+
 
   useEffect(() => {
     const getSaleBills = async () => {
       try {
         const data = await fetchSaleBillNo();
-        console.log("vf",data)
-      const maxBillNumber = data?.lastBillNumber ? parseInt(data.lastBillNumber, 10) : 0;
-      console.log("Last Bill Number:", maxBillNumber);
-      
-      setBillNumber(maxBillNumber + 1);
+        const maxBillNumber = data?.lastBillNumber;
+        setBillNumber(parseInt(maxBillNumber, 10) + 1);
+        setPrefix(data?.prefix)
       } catch (error) {
         console.error("Error fetching sale bills:", error);
       }
@@ -48,18 +49,23 @@ const SaleBillScreen = () => {
 
     getSaleBills();
     const unsubscribe = interstitial.addAdEventListener(AdEventType.LOADED, () => {
-          setIsAdLoaded(true);
-        });
-    
-        interstitial.load(); // Start loading the ad
-    
-        return () => {
-          unsubscribe(); // Cleanup event listener
-        };
+      setIsAdLoaded(true);
+    });
+
+    interstitial.load(); // Start loading the ad
+
+    return () => {
+      unsubscribe(); // Cleanup event listener
+    };
   }, []);
 
 
   const totalAmount = selectedProducts.reduce((total, item) => total + item.quantity * item.price, 0);
+
+  const handleUpdateBillNumber = (newBillNumber: string, newPrefix: string) => {
+    setBillNumber(newBillNumber);
+    setPrefix(newPrefix);
+};
 
   const saveBill = async () => {
     setIsSaving(true);
@@ -69,22 +75,25 @@ const SaleBillScreen = () => {
       return;
     }
 
-    if (selectedProducts.length === 0) {
+    if (selectedProducts.length === 0 && !isService) {
       showToast("error", "Error", "Please select at least one product.");
       return;
     }
-
+    
     try {
       await saveBillToServer(
-        billNumber,
+        billNumber ,
         date,
         selectedCustomer,
         selectedProducts.map((item) => ({
-          productId: item.productId, // Use correct productId
+          productId: item.productId ?? null,
+          serviceId: item.serviceId ?? null,
           quantity: item.quantity,
           price: item.price,
         })),
-        paymentMethod
+        paymentMethod,
+        prefix, 
+        isService
       );
 
       // Show Interstitial Ad if loaded
@@ -99,6 +108,7 @@ const SaleBillScreen = () => {
             selectedProducts,
             totalAmount,
             paymentMethod,
+            prefix
           });
           interstitial.load(); // Load next ad for future use
         });
@@ -111,6 +121,7 @@ const SaleBillScreen = () => {
           selectedProducts,
           totalAmount,
           paymentMethod,
+          prefix
         });
       }
     } catch (error) {
@@ -130,7 +141,15 @@ const SaleBillScreen = () => {
             {/* Sale Bill Number */}
             <View>
               <Text style={{ fontSize: 14 }}>Sale Bill Number:     </Text>
-              <Text style={{ fontSize: 12, fontWeight: "bold", borderWidth: 1, borderColor: "#D0DDD0", padding: 8 }}>{billNumber}</Text>
+              <View style={{flexDirection:"row" ,justifyContent:"center",alignItems:"center"}}>
+              <Text style={{ fontSize: 12, fontWeight: "bold",width:100, borderWidth: 1, borderColor: "#D0DDD0", padding: 8 }}>{prefix}{billNumber}</Text>
+              <TouchableOpacity  onPress={() => setModalVisible1(true)} style={{ marginLeft: 5 }}>
+                <Image
+                  source={require("../../assets/edit.png")}
+                  style={{ width: 30, height: 30 }}
+                />
+              </TouchableOpacity>
+              </View>
             </View>
 
             {/* Date Picker */}
@@ -251,15 +270,29 @@ const SaleBillScreen = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-      <ProductModal
+      <ProductServiceModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onSelect={(products) => setSelectedProducts(products)}
+        onSelect={(products) => {
+          if (isService) {
+            setSelectedProducts(products); 
+          } else {
+            setSelectedProducts(products); 
+          }
+        }}
+        isService={isService}
       />
       <CustomerModal
         visible={customerModalVisible}
         onClose={() => setCustomerModalVisible(false)}
         onSelect={(customer) => setSelectedCustomer(customer)}
+      />
+       <EditSaleBillNumberModal
+        isVisible={isModalVisible1}
+        onClose={() => setModalVisible1(false)}
+        billNumber={billNumber}
+        prefix={prefix}
+      setBillDetails={handleUpdateBillNumber} 
       />
     </>
   );

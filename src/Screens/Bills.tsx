@@ -2,7 +2,6 @@ import React from 'react'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import SaleBill from '../TabScreen/BillTab/SaleBill';
 import PurcheseBill from '../TabScreen/BillTab/PurcheseBill';
-import Expenses from '../TabScreen/BillTab/Expenses';
 
 const Tab = createMaterialTopTabNavigator();
 const Bills = () => {

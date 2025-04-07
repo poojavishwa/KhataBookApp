@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, Switch, TouchableOpacity, Image, StyleSheet, Alert } from "react-native";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { Picker } from "@react-native-picker/picker";
 import { ScrollView } from "react-native-gesture-handler";
 import useProductForm from "../../Api/Product/useProductForm";
 import { showToast } from "../../constants/showToast";
+import { fetchProductUnits } from "../../Api/Product/productCrud";
 
 const CreateProduct = () => {
   const { submitProduct, loading } = useProductForm();
@@ -13,10 +14,11 @@ const CreateProduct = () => {
   const [purchasePrice, setPurchasePrice] = useState("");
   const [openingStock, setOpeningStock] = useState("");
   const [lowStockAlert, setLowStockAlert] = useState("");
-  const [taxIncluded, setTaxIncluded] = useState(false);
+  const [taxIncluded, setTaxIncluded] = useState (false);
   const [imageUri, setImageUri] = useState<string | null>(null);
-  const [selectedUnit, setSelectedUnit] = useState("kg"); // Default Unit
+  const [selectedUnit, setSelectedUnit] = useState("kg");
   const [gstIn, setGstIn] = useState("");
+   const [units, setunits] = useState<any[]>([]);
 
   const selectImage = () => {
     Alert.alert("Select Image", "Choose an option", [
@@ -44,7 +46,7 @@ const CreateProduct = () => {
 
   const handleSubmit = () => {
     if (!itemName || !salePrice || !purchasePrice) {
-      showToast("error","Error","Please fill all required fields.");
+      showToast("error", "Error", "Please fill all required fields.");
       return;
     }
 
@@ -53,7 +55,7 @@ const CreateProduct = () => {
       sellingPrice: Number(salePrice) || 0,  // Ensure number type
       costPrice: Number(purchasePrice) || 0,
       openingStock: Number(openingStock) || 0,
-      lowStockAlert: Number(lowStockAlert) || 0,
+      LowstockAlert: Number(lowStockAlert) || 0,
       gstIn: Number(gstIn) || 0,
       selectedUnit,
       productImage: imageUri,
@@ -61,6 +63,18 @@ const CreateProduct = () => {
       unit: selectedUnit,
     });
   };
+
+ useEffect(() => {
+const loadProducts = async () => {
+      try {
+        const data = await fetchProductUnits();
+        setunits(data);
+      } catch (error) {
+        console.error("Error fetching units:", error);
+      }
+    };
+    loadProducts();
+  }, []);
 
 
 
@@ -92,16 +106,11 @@ const CreateProduct = () => {
             <Picker
               selectedValue={selectedUnit}
               onValueChange={(itemValue) => setSelectedUnit(itemValue)}
-              // style={styles.picker}
-              // style={{ fontSize: 2}}
-               mode="dropdown"
+              mode="dropdown" 
             >
-              <Picker.Item label="Kilogram (kg)" value="kg" />
-              <Picker.Item label="Gram (g)" value="g" />
-              <Picker.Item label="Liter (li)" value="li" />
-              <Picker.Item label="Pieces" value="pieces" />
-              <Picker.Item label="Units" value="units" />
-              <Picker.Item label="Mililiter(ml)" value="ml" />
+              {units.map((unit) => (
+                <Picker.Item key={unit.unitName} label={unit.unitName} value={unit.unitName} />
+              ))}
             </Picker>
           </View>
         </View>
@@ -198,7 +207,7 @@ const styles = StyleSheet.create({
   saveButton: { padding: 10, borderRadius: 5, alignItems: "center", marginTop: 10 },
   saveButtonActive: { backgroundColor: "#007bff" },
   saveButtonDisabled: { backgroundColor: "#ccc" },
-  saveButtonText: { color: "#fff", fontWeight: "bold",fontSize:14 },
+  saveButtonText: { color: "#fff", fontWeight: "bold", fontSize: 14 },
   pickerContainer: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -233,7 +242,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: "#fff",
     marginBottom: 10,
-    fontSize:12,
+    fontSize: 12,
   },
 });
 

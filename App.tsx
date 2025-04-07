@@ -28,10 +28,10 @@ const App = () => {
       ) : (
         <NavigationContainer>
           <AppNavigator />
-          <BannerAdds />
           <Toast />
         </NavigationContainer>
       )}
+      <BannerAdds />
     </>
 
   )

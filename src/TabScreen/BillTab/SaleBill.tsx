@@ -15,7 +15,6 @@ const SaleBill = () => {
   const navigation = useNavigation();
   const [bill, setBill] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  console.log("sake bill",bill)
   const loadCustomers = async () => {
     setLoading(true);
     try {

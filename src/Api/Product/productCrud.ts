@@ -94,3 +94,22 @@ export const fetchProductTotal = async () => {
   }
 };
 
+export const fetchProductUnits = async () => {
+  try {
+    const token = await AsyncStorage.getItem("authToken");
+    const response = await axios.get(`${API_URL}/productUnit/get`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data.productUnit; // Ensure the key is correct
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("Axios Error:", error.response?.data || error.message);
+    } else {
+      console.error("Unexpected Error:", error);
+    }
+    return [];
+  }
+};

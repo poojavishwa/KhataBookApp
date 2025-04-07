@@ -4,18 +4,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { Alert } from "react-native";
 
-const useProductForm = () => {
+const useServiceForm = () => {
    const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
 
   const submitProduct = async ({
-    name,
-    sellingPrice,
-    costPrice,
-    openingStock,
-    LowstockAlert,
+    serviceName,
+    servicePrice,
     gstIncluded,
-    productImage,
+    serviceImage,
     unit,
     gstIn,
   }: any) => {
@@ -31,24 +28,22 @@ const useProductForm = () => {
       }
 
       const formData = new FormData();
-      formData.append("name", name);
-      formData.append("sellingPrice", String(sellingPrice));
-      formData.append("costPrice", String(costPrice));
-      formData.append("stock", String(openingStock));
-      formData.append("LowstockAlert", String(LowstockAlert));
+      formData.append("serviceName", serviceName);
+      formData.append("servicePrice", String(servicePrice));
       formData.append("gstPercentage", String(gstIn));
       formData.append("unit", String(unit));
       formData.append("gstIncluded", gstIncluded ? "true" : "false");
 
-      if (productImage) {
-        formData.append("productImage", {
-          uri: productImage,
+      if (serviceImage) {
+        formData.append("serviceImage", {
+          uri: serviceImage,
           name: "product.jpg",
           type: "image/jpeg",
         } as any);
       }
+      
 
-      const response = await fetch(`${API_URL}/product/add`, {
+      const response = await fetch(`${API_URL}/service/add`, {
         method: "POST",
         body: formData,
         headers: {
@@ -64,13 +59,12 @@ const useProductForm = () => {
 
       if (contentType && contentType.includes("application/json")) {
         const result = await response.json();
-        // console.log("Product added:", result);
 
         if (response.ok) {
-         Alert.alert("Product added successfully!");
+         Alert.alert("Service added successfully!");
           navigation.goBack();
         } else {
-         Alert.alert(result.message || "Failed to add product!");
+         Alert.alert(result.message || "Failed to add service!");
         }
       } else {
         const text = await response.text();
@@ -78,8 +72,8 @@ const useProductForm = () => {
         Alert.alert("Unexpected response from server. Check console for details.");
       }
     } catch (error) {
-      console.error("Error submitting product:", error);
-      Alert.alert("An error occurred while adding the product.");
+      console.error("Error submitting service:", error);
+      Alert.alert("An error occurred while adding the service.");
     } finally {
       setLoading(false);
     }
@@ -88,4 +82,4 @@ const useProductForm = () => {
   return { submitProduct, loading };
 };
 
-export default useProductForm;
+export default useServiceForm;

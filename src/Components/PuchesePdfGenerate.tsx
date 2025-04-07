@@ -7,7 +7,7 @@ import { requestStoragePermission } from "../Screens/billScreen/SaleInvoice";
 export const PurchesePdfGenerate = async (
   billNumber, date, selectedCustomer, selectedProducts,
   totalBasePrice, totalGSTAmount, totalAmount, paymentMethod,
-  halfGSTPercentage, halfGstAmount, totalprice, customerData
+  halfGSTPercentage, halfGstAmount, totalprice, customerData,prefix
 ) => {
 
   const safeProducts = Array.isArray(selectedProducts) ? selectedProducts : [];
@@ -134,7 +134,7 @@ export const PurchesePdfGenerate = async (
               </div>
             <div class="invoice-header">
             <div>
-              <strong>Invoice No: ${billNumber}</strong><br />
+              <strong>Invoice No: ${prefix}${billNumber}</strong><br />
                 <strong>Invoice Date: ${new Date(date).toLocaleDateString('en-GB')}</strong>
             </div>
             </div>
@@ -197,12 +197,12 @@ export const PurchesePdfGenerate = async (
                 <th>Tax</th>
               </tr>
               <tr>
-                <td>CGST ${halfGSTPercentage.toFixed(0)}%</td>
+                <td>CGST</td>
                 <td>${safeTotalBasePrice.toFixed(2)}</td>
                 <td>${halfGstAmount.toFixed(2)}</td>
               </tr>
               <tr>
-                <td>SGST ${halfGSTPercentage.toFixed(0)}%</td>
+                <td>SGST</td>
                 <td>${safeTotalBasePrice.toFixed(2)}</td>
                 <td>${halfGstAmount.toFixed(2)}</td>
               </tr>

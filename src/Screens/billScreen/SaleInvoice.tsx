@@ -11,7 +11,7 @@ import { fetchCustomerGetById } from "../../Api/profile/profile";
 const InvoiceScreen = () => {
   const route = useRoute();
   const date = route.params?.date ? new Date(route.params.date) : new Date();
-  const { billNumber, selectedCustomer, selectedProducts, totalAmount, paymentMethod } = route.params;
+  const { billNumber, selectedCustomer, selectedProducts, totalAmount, paymentMethod,prefix } = route.params;
   const navigation = useNavigation();
   const [userId, setUserId] = useState<string | null>(null);
   const [customerData, setCustomerData] = useState<any>({});
@@ -75,7 +75,7 @@ const InvoiceScreen = () => {
       const filePath = await generatePDF(
         billNumber, date, selectedCustomer, selectedProducts,
         totalBasePrice, totalGSTAmount, totalAmount, paymentMethod,
-        halfGSTPercentage, halfGstAmount, totalprice, customerData
+        halfGSTPercentage, halfGstAmount, totalprice, customerData,prefix
       );
 
 
@@ -113,7 +113,7 @@ const InvoiceScreen = () => {
             )}
                {customerData.GSTIN && <Text style={styles.addressText}>GST IN :{customerData?.GSTIN}</Text>}
           </View>
-          <Text style={styles.invoiceNumber}>Invoice No. {billNumber}</Text>
+          <Text style={styles.invoiceNumber}>Invoice No. {prefix}{billNumber}</Text>
           <Text style={styles.invoiceDate}>Invoice Date: {new Date(date).toLocaleDateString('en-GB')}</Text>
 
           <View style={[styles.box, styles.customerContainer]}>
@@ -185,13 +185,13 @@ const InvoiceScreen = () => {
           </View>
 
           <View style={styles.tableRow}>
-            <Text style={styles.tableText}>CGST {(halfGSTPercentage).toFixed(0)}%</Text>
+            <Text style={styles.tableText}>CGST</Text>
             <Text style={styles.tableText}>{totalBasePrice.toFixed(2)}</Text>
             <Text style={styles.tableText}>{halfGstAmount.toFixed(2)}</Text>
           </View>
 
           <View style={styles.tableRow}>
-            <Text style={styles.tableText}>SGST {(halfGSTPercentage).toFixed(0)}%</Text>
+            <Text style={styles.tableText}>SGST</Text>
             <Text style={styles.tableText}>{totalBasePrice.toFixed(2)}</Text>
             <Text style={styles.tableText}>{halfGstAmount.toFixed(2)}</Text>
           </View>

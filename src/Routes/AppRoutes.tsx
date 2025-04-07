@@ -9,7 +9,6 @@ import CreateCustomer from '../Screens/customerScreen/CreateCustomer';
 import CreateSupplier from '../Screens/supplierScreen/CreateSupplier';
 import CreateProduct from '../Screens/ProductsScreen/CreateProduct';
 import CustomerDetails from '../Screens/customerScreen/CustomerDetails';
-import CreateService from '../Screens/ServiceScreen/CreateService';
 import CreateSaleBill from '../Screens/billScreen/CreateSaleBill';
 import CreatePucheseScreen from '../Screens/billScreen/CreateParcheseBill';
 import ProductDetails from '../Screens/ProductsScreen/ProductDetails';
@@ -28,7 +27,12 @@ import SaleBillDetails from '../Screens/billScreen/SaleBillDetails';
 import UpdateSaleBill from '../Screens/billScreen/UpdateSaleBill';
 import PurcheseBillDetails from '../Screens/billScreen/PurcheseBillDetails';
 import UpdatePurcheseBill from '../Screens/billScreen/UpdatePurcheseBill';
-
+import CreateService from '../Screens/ServiceScreen/CreateService';
+import ServiceDetails from '../Screens/ServiceScreen/ServiceDetails';
+import UpdateService from '../Screens/ServiceScreen/UpdateService';
+import ProductReport from '../Screens/Report/ProductReport';
+import SaleBillReport from '../Screens/Report/SaleBillReport';
+import PurchaseBillReport from '../Screens/Report/PurchaseBillReport';
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
@@ -76,6 +80,7 @@ const AppNavigator = () => {
       <Stack.Screen name="Add Product" component={CreateProduct} />
       <Stack.Screen name="Customer Details" component={CustomerDetails}  options={{ headerShown: false }} />
       <Stack.Screen name="Supplier Details" component={SupplierDetails}  options={{ headerShown: false }} />
+      <Stack.Screen name="Service Details" component={ServiceDetails}  options={{ headerShown: false }} />
       <Stack.Screen name="Add Service" component={CreateService} />
       <Stack.Screen name="Add Sale" component={CreateSaleBill} />
       <Stack.Screen name="Add Purchase" component={CreatePucheseScreen} />
@@ -137,6 +142,22 @@ const AppNavigator = () => {
          <Stack.Screen
         name="Update Purchase Bill"
         component={UpdatePurcheseBill}
+      />
+       <Stack.Screen
+        name="Update Service"
+        component={UpdateService}
+      />
+         <Stack.Screen
+        name="Product Report"
+        component={ProductReport}
+      />
+         <Stack.Screen
+        name="Sale Bill Report"
+        component={SaleBillReport}
+      />
+         <Stack.Screen
+        name="Purchase Bill Report"
+        component={PurchaseBillReport}
       />
     </Stack.Navigator>
   );

@@ -6,6 +6,7 @@ import Bills from '../Screens/Bills';
 import SettingPage from '../Screens/SettingPage';
 import { Image } from 'react-native';
 import ReportTab from '../TabScreen/ReportTab';
+import ReportPage from '../Screens/Report/ReportPage';
 
 const PartiesIcon = require('../assets/customer.png');
 const ItemsIcon = require('../assets/delivery.png');
@@ -51,7 +52,7 @@ const BottomNavigation = () => {
     <Tab.Screen name="Parties" component={Parties} />
     <Tab.Screen name="Items" component={Items} />
     <Tab.Screen name="Bills" component={Bills} />
-    <Tab.Screen name="Report" component={ReportTab} />
+    <Tab.Screen name="Report" component={ReportPage} />
     <Tab.Screen name="Settings" component={SettingPage} />
   </Tab.Navigator>
   )
