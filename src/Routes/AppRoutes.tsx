@@ -33,6 +33,8 @@ import UpdateService from '../Screens/ServiceScreen/UpdateService';
 import ProductReport from '../Screens/Report/ProductReport';
 import SaleBillReport from '../Screens/Report/SaleBillReport';
 import PurchaseBillReport from '../Screens/Report/PurchaseBillReport';
+import CreateQuotation from '../Screens/quotation/CreateQuotation';
+import Quotations from '../Screens/quotation/Quotations';
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
@@ -158,6 +160,16 @@ const AppNavigator = () => {
          <Stack.Screen
         name="Purchase Bill Report"
         component={PurchaseBillReport}
+      />
+       <Stack.Screen
+        name="Quotations"
+        component={Quotations}
+        options={{ title: 'Quotations' }}
+      />
+        <Stack.Screen
+        name="Create Quotation"
+        component={CreateQuotation}
+        options={{ title: 'Create Quotation' }}
       />
     </Stack.Navigator>
   );

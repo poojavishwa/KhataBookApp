@@ -3,6 +3,8 @@ import { View, Text, Modal, TouchableOpacity, FlatList, TextInput, Image, StyleS
 import { fetchProducts } from "../../Api/Product/productCrud";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { IMAGE_URL } from "../../constants/API_URL";
+import EditPriceModal from "../billScreen/EditPriceModal";
+import EditPurchasePrice from "../billScreen/EditPurchasePrice";
 
 interface ProductSelectionModalProps {
     visible: boolean;
@@ -16,6 +18,9 @@ const ProductPurcheseModal: React.FC<ProductSelectionModalProps> = ({ visible, o
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [cart, setCart] = useState<{ [key: string]: number }>({});
+    const [expandedProductId, setExpandedProductId] = useState<string | null>(null);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [isModalVisible, setModalVisible] = useState(false);
     const loadProducts = async () => {
         setLoading(true);
         try {
@@ -41,6 +46,7 @@ const ProductPurcheseModal: React.FC<ProductSelectionModalProps> = ({ visible, o
     );
 
     return (
+        <>
         <Modal visible={visible} animationType="slide" transparent>
             <View style={styles.modalBackground}>
                 <View style={styles.modalContainer}>
@@ -64,52 +70,101 @@ const ProductPurcheseModal: React.FC<ProductSelectionModalProps> = ({ visible, o
                                     const quantity = cart[item._id] || 0;
 
                                     return (
-                                        <View style={styles.productRow}>
-                                            <Image source={{ uri: `${IMAGE_URL}${item.productImage}` }} style={styles.productImage} />
+                                        <>
+                                            <View style={styles.productRow}>
+                                                <Image source={{ uri: `${IMAGE_URL}${item.productImage}` }} style={styles.productImage} />
 
-                                            <View style={styles.productDetails}>
-                                                <Text style={styles.productName}>{item.name}</Text>
-                                                <Text style={styles.productPrice}>Purchase Price: ₹{item.costPrice}</Text>
-                                                <Text style={styles.productStock}>Stock: {item.stock}</Text>
-                                            </View>
+                                                <View style={styles.productDetails}>
+                                                    <Text style={styles.productName}>{item.name}</Text>
+                                                    <Text style={styles.productPrice}>Purchase Price: ₹{item.costPrice}</Text>
+                                                    <Text style={styles.productStock}>Stock: {item.stock}</Text>
+                                                </View>
 
-                                            {/* Quantity Selector */}
-                                            {quantity > 0 ? (
-                                                <View style={styles.quantityContainer}>
+                                                {/* Quantity Selector */}
+                                                {quantity > 0 ? (
+                                                    <View style={styles.quantityContainer}>
+                                                        <TouchableOpacity
+                                                            onPress={() => {
+                                                                const newQuantity = quantity - 1;
+                                                                if (newQuantity === 0) {
+                                                                    const newCart = { ...cart };
+                                                                    delete newCart[item._id];
+                                                                    setCart(newCart);
+                                                                    setExpandedProductId(null);
+                                                                } else {
+                                                                    setCart({ ...cart, [item._id]: newQuantity });
+                                                                }
+                                                            }}
+                                                            style={styles.quantityButton}
+                                                        >
+                                                            <Text style={styles.quantityText}>−</Text>
+                                                        </TouchableOpacity>
+
+                                                        <Text style={styles.quantityValue}>{quantity}</Text>
+
+                                                        <TouchableOpacity
+                                                            onPress={() => setCart({ ...cart, [item._id]: quantity + 1 })}
+                                                            style={styles.quantityButton}
+                                                        >
+                                                            <Text style={styles.quantityText}>+</Text>
+                                                        </TouchableOpacity>
+                                                    </View>
+                                                ) : (
                                                     <TouchableOpacity
-                                                        onPress={() => {
-                                                            const newQuantity = quantity - 1;
-                                                            if (newQuantity === 0) {
-                                                                const newCart = { ...cart };
-                                                                delete newCart[item._id];
-                                                                setCart(newCart);
-                                                            } else {
-                                                                setCart({ ...cart, [item._id]: newQuantity });
-                                                            }
-                                                        }}
-                                                        style={styles.quantityButton}
+                                                        onPress={() => { setCart({ ...cart, [item._id]: 1 }), setExpandedProductId(item._id) }}
+                                                        style={styles.addButton}
                                                     >
-                                                        <Text style={styles.quantityText}>−</Text>
+                                                        <Text style={styles.addButtonText}>ADD +</Text>
                                                     </TouchableOpacity>
-
-                                                    <Text style={styles.quantityValue}>{quantity}</Text>
-
+                                                )}
+                                            </View>
+                                            {expandedProductId === item._id && (
+                                                <View style={{
+                                                    marginTop: 10,
+                                                    backgroundColor: '#F1F3F5',
+                                                    borderRadius: 10,
+                                                    padding: 12,
+                                                    width: '96%',
+                                                }}>
+                                                    <View style={{ alignItems: 'center', marginBottom: 10 }}>
+                                                        <Text style={{ fontWeight: 'bold', fontSize: 16, color: '#555' }}>Sales Price (₹)</Text>
+                                                        <Text style={{ fontSize: 18, fontWeight: 'bold' }}>₹ {item.costPrice}</Text>
+                                                    </View>
+                                                    <View style={{ height: 1, backgroundColor: '#FFF', marginVertical: 8 }} />
+                                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <Text style={{ fontWeight: 'bold', color: '#777' }}>Item Discount</Text>
+                                                        {item.discount ? (
+                                                            <Text style={{ fontSize: 14, color: '#D9534F' }}>
+                                                                {item.discountType === "percentage"
+                                                                    ? `${item.discount}% (₹${((item.costPrice * item.discount) / 100).toFixed(2)})`
+                                                                    : `₹${item.discount.toFixed(2)}`}
+                                                            </Text>
+                                                        ) : null}
+                                                        <Text style={{ fontWeight: 'bold', color: '#777' }}>Final Price</Text>
+                                                        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>₹ {item.costPrice}</Text>
+                                                    </View>
                                                     <TouchableOpacity
-                                                        onPress={() => setCart({ ...cart, [item._id]: quantity + 1 })}
-                                                        style={styles.quantityButton}
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: -15,
+                                                            right: -10,
+                                                            backgroundColor: 'white',
+                                                            borderRadius: 20,
+                                                            borderWidth: 2,
+                                                            borderColor: '#007AFF',
+                                                            padding: 4,
+                                                        }}
+                                                        onPress={() => {
+                                                            setSelectedItem(item);
+                                                            setModalVisible(true);
+                                                        }}
                                                     >
-                                                        <Text style={styles.quantityText}>+</Text>
+                                                        <Text style={{ color: '#007AFF', fontWeight: 'bold' }}
+                                                        >✏️</Text>
                                                     </TouchableOpacity>
                                                 </View>
-                                            ) : (
-                                                <TouchableOpacity
-                                                    onPress={() => setCart({ ...cart, [item._id]: 1 })}
-                                                    style={styles.addButton}
-                                                >
-                                                    <Text style={styles.addButtonText}>ADD +</Text>
-                                                </TouchableOpacity>
                                             )}
-                                        </View>
+                                        </>
                                     );
                                 }}
                             />
@@ -132,6 +187,8 @@ const ProductPurcheseModal: React.FC<ProductSelectionModalProps> = ({ visible, o
                                                 name: product.name,
                                                 quantity: cart[productId],
                                                 price: product.costPrice,
+                                                discount: product.discount || 0,
+                                                discountType: product.discountType || 'rupee',
                                                 gstPercentage: product.gstPercentage,
                                                 costPrice: product.costPrice,
                                             };
@@ -161,6 +218,26 @@ const ProductPurcheseModal: React.FC<ProductSelectionModalProps> = ({ visible, o
                 </View>
             </View>
         </Modal>
+        {selectedItem && (
+                <EditPurchasePrice
+                    visible={isModalVisible}
+                    item={selectedItem}
+                    onClose={() => setModalVisible(false)}
+                    onSave={(updated) => {
+                        setProducts(products.map((p) =>
+                            p._id === selectedItem._id
+                                ? {
+                                    ...p,
+                                    costPrice: updated.costPrice,
+                                    discount: updated.discount,
+                                    discountType: updated.discountType
+                                }
+                                : p
+                        ));
+                    }}
+                />
+            )}
+        </>
     );
 };
 
@@ -297,14 +374,14 @@ const styles = StyleSheet.create({
     },
     emptyContainer: {
         flex: 1,
-    justifyContent: "center",
-    alignItems: "center",   
+        justifyContent: "center",
+        alignItems: "center",
     },
     emptyText: {
         fontSize: 16,
         color: "gray",
         textAlign: "center",
-        marginBottom:10,
+        marginBottom: 10,
     },
     addCustomerButton: {
         backgroundColor: "#007AFF",
@@ -319,7 +396,7 @@ const styles = StyleSheet.create({
     },
     centerContent: {
         alignItems: "center",
-      },
+    },
 });
 
 export default ProductPurcheseModal;

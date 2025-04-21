@@ -1,8 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { View, Text, Modal, TouchableOpacity, FlatList, TextInput, Image, StyleSheet } from "react-native";
-import { fetchProducts } from "../../Api/Product/productCrud";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { IMAGE_URL } from "../../constants/API_URL";
 import { fetchCustomers } from "../../Api/customer/customerCrud";
 
 interface ProductSelectionModalProps {

@@ -7,7 +7,13 @@ export const saveBillToServer = async (
   billNumber: number,
   date: Date,
   selectedCustomer: any,
-  selectedProducts: { productId: string; serviceId: string; quantity: number; price: number }[],
+  selectedProducts: { productId: string; 
+    serviceId: string; 
+    quantity: number; 
+    price: number;
+    discount?: number;
+    discountType?: 'percentage' | 'rupee'; 
+  }[],
   paymentMethod: string,
   prefix: string,
   isService: boolean
@@ -27,10 +33,15 @@ export const saveBillToServer = async (
       return;
     }
 
-    const saleBillAmount = selectedProducts.reduce(
-      (total, item) => total + item.quantity * item.price,
-      0
-    );
+    const saleBillAmount = selectedProducts.reduce((total, item) => {
+      const itemTotal = item.quantity * item.price;
+      const discountAmount = item.discount 
+        ? (item.discountType === 'percentage' 
+          ? itemTotal * (item.discount / 100) 
+          : item.discount * item.quantity)
+        : 0;
+      return total + itemTotal - discountAmount;
+    }, 0);
 
     const requestBody = {
       customerId: selectedCustomer._id, // Send correct customerId
@@ -45,6 +56,8 @@ export const saveBillToServer = async (
           productId: p.productId,
           quantity: p.quantity,
           price: p.price,
+          discount: p.discount || 0,
+          discountType: p.discountType || 'rupee',
         })),
       services: selectedProducts
         .filter((s) => s.serviceId) // Only services
@@ -52,6 +65,8 @@ export const saveBillToServer = async (
           serviceId: s.serviceId,
           quantity: s.quantity,
           price: s.price,
+          discount: s.discount || 0,
+          discountType: s.discountType || 'rupee',
         })),
 
       prefix: prefix

@@ -7,13 +7,23 @@ import { requestStoragePermission } from "../Screens/billScreen/SaleInvoice";
 export const PurchesePdfGenerate = async (
   billNumber, date, selectedCustomer, selectedProducts,
   totalBasePrice, totalGSTAmount, totalAmount, paymentMethod,
-  halfGSTPercentage, halfGstAmount, totalprice, customerData,prefix
+  halfGSTPercentage, halfGstAmount, totalprice, customerData,prefix,
+  calculateDiscountAmount, hasDiscount, totalDiscountAmount, subtotalAmount
 ) => {
 
   const safeProducts = Array.isArray(selectedProducts) ? selectedProducts : [];
   const safeTotalBasePrice = typeof totalBasePrice === "number" ? totalBasePrice : 0;
   const safeTotalGSTAmount = typeof totalGSTAmount === "number" ? totalGSTAmount : 0;
   const safeTotalPrice = typeof totalprice === "number" ? totalprice : 0;
+
+  const finalAmountSubtotal = selectedProducts.reduce((acc, item) => {
+    const itemTotal = item.costPrice * item.quantity;
+    const discountAmount = item.discountType === "percentage"
+      ? (itemTotal * (item.discount || 0)) / 100
+      : (item.discount || 0) * item.quantity;
+
+    return acc + (itemTotal - discountAmount);
+  }, 0);
 
   const paidImageUrl = "https://res.cloudinary.com/dpbx63xbs/image/upload/v1743071474/b1gxpxky2f6our77uwj6.png";
   const unpaidImageUrl = "https://res.cloudinary.com/dpbx63xbs/image/upload/v1743071474/xraxi7glabfbmqjj9xus.png";
@@ -160,20 +170,36 @@ export const PurchesePdfGenerate = async (
             <th>Item</th>
             <th>Qty</th>
             <th>Price</th>
+             ${hasDiscount ? "<th>Discount</th>" : ""}
             <th>GST%</th>
             <th>Total</th>
           </tr>
   ${safeProducts
         .map((item, index) => {
           const basePrice = (item.costPrice * 100) / (100 + item.gstPercentage);
+          const discountAmount =
+          item.discountType === "percentage"
+            ? ((basePrice * item.quantity) * (item.discount || 0)) / 100
+            : (item.discount || 0) * item.quantity;
+
+        const discountedBasePrice = (basePrice * item.quantity - discountAmount).toFixed(2);
           return `
         <tr>
           <td>${index + 1}</td>
           <td>${item.name}</td>
           <td>${item.quantity}</td>
-          <td>${basePrice.toFixed(2)}</td>
+          <td>${discountedBasePrice}</td>
+                  ${hasDiscount
+              ? `<td>${discountAmount.toFixed(2)}</td>`
+              : ""
+            }
          <td>${((item.costPrice - basePrice) * item.quantity).toFixed(2)}%</td>
-          <td>${(item.costPrice * item.quantity).toFixed(2)}</td>
+          <td>${(
+              item.costPrice * item.quantity -
+              (item.discountType === "percentage"
+                ? (item.costPrice * item.quantity * (item.discount || 0)) / 100
+                : (item.discount || 0) * item.quantity)
+            ).toFixed(2)}</td>
         </tr>
       `;
         })
@@ -183,9 +209,10 @@ export const PurchesePdfGenerate = async (
   <tr style="background-color: #E5E5E5; font-weight: bold;">
     <td colspan="2" style="text-align: center;">Subtotal</td>
     <td>${safeProducts.reduce((sum, item) => sum + item.quantity, 0)}</td>
-    <td>${safeTotalBasePrice.toFixed(2)}</td>
+    <td>${subtotalAmount.toFixed(2)}</td>
+     ${hasDiscount ? `<td>${totalDiscountAmount.toFixed(2)}</td>` : ""}
     <td>${safeTotalGSTAmount.toFixed(2)}</td>
-    <td>${safeTotalPrice.toFixed(2)}</td>
+    <td>${finalAmountSubtotal.toFixed(2)}</td>
   </tr>
 </table>
 
@@ -198,17 +225,17 @@ export const PurchesePdfGenerate = async (
               </tr>
               <tr>
                 <td>CGST</td>
-                <td>${safeTotalBasePrice.toFixed(2)}</td>
+                <td>${subtotalAmount.toFixed(2)}</td>
                 <td>${halfGstAmount.toFixed(2)}</td>
               </tr>
               <tr>
                 <td>SGST</td>
-                <td>${safeTotalBasePrice.toFixed(2)}</td>
+                <td>${subtotalAmount.toFixed(2)}</td>
                 <td>${halfGstAmount.toFixed(2)}</td>
               </tr>
             </table>
             <div class="total-Price">
-            <p class="total-amount">Total Amount -  ${safeTotalPrice.toFixed(2)}</p>
+            <p class="total-amount">Total Amount -  ${finalAmountSubtotal.toFixed(2)}</p>
             </div>
           </div>
         </body>

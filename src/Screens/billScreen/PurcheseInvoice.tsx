@@ -13,14 +13,33 @@ import { fetchCustomerGetById } from "../../Api/profile/profile";
 
 const PurcheseInvoice = () => {
   const route = useRoute();
-  const { billNumber, date, selectedCustomer, selectedProducts, totalAmount, paymentMethod,prefix } = route.params;
+  const { billNumber, date, selectedCustomer, selectedProducts, totalAmount, paymentMethod, prefix } = route.params;
   const navigation = useNavigation();
-  const userName = AsyncStorage.getItem("userName");
-  const phone = AsyncStorage.getItem("phone");
 
   const [userId, setUserId] = useState<string | null>(null);
   const [customerData, setCustomerData] = useState<any>({});
-  console.log("customerData", customerData)
+
+  const hasDiscount = selectedProducts.some(item => item.discount && item.discount > 0);
+
+  const calculateDiscountAmount = (item: any) => {
+    if (!item.discount || item.discount <= 0) return 0;
+
+    const itemTotal = item.quantity * item.costPrice;
+
+    if (item.discountType === "percentage") {
+      return itemTotal * (item.discount / 100);
+    } else {
+      return item.discount * item.quantity;
+    }
+  };
+
+
+  const totalDiscountAmount = selectedProducts.reduce(
+    (acc, item) => acc + calculateDiscountAmount(item),
+    0
+  );
+
+
   useEffect(() => {
     const fetchCustomer = async () => {
       try {
@@ -37,10 +56,13 @@ const PurcheseInvoice = () => {
 
     fetchCustomer();
   }, []);
+
   const totalGSTAmount = selectedProducts.reduce((acc, item) => {
-    const basePrice = (item.costPrice * 100) / (100 + item.gstPercentage); // Price excluding GST
-    const gstAmount = item.costPrice - basePrice;
-    return acc + gstAmount * item.quantity; // Sum total GST
+    const itemTotal = item.quantity * item.costPrice;
+    const discountAmount = calculateDiscountAmount(item);
+    const taxableAmount = itemTotal - discountAmount;
+    const gstAmount = (taxableAmount * item.gstPercentage) / (100 + item.gstPercentage);
+    return acc + gstAmount;
   }, 0);
 
   const totalBasePrice = selectedProducts.reduce((acc, item) => {
@@ -49,13 +71,42 @@ const PurcheseInvoice = () => {
   }, 0);
 
 
-  const gstAmount = selectedProducts.reduce(
-    (acc, item) => acc + (item.costPrice * item.quantity * item.gstPercentage) / 100,
-    0
-  );
+  const gstAmount = selectedProducts.reduce((acc, item) => {
+    const basePrice = (item.costPrice * 100) / (100 + item.gstPercentage);
+    const baseTotal = basePrice * item.quantity;
+    const discountAmount = item.discountType === "percentage"
+      ? (baseTotal * (item.discount || 0)) / 100
+      : (item.discount || 0) * item.quantity;
 
-  const subtotalAmount = selectedProducts.reduce((acc, item) => acc + item.costPrice * item.quantity, 0) - gstAmount;
-  const totalprice = subtotalAmount + gstAmount;
+    const taxableAmount = baseTotal - discountAmount;
+    const itemGst = (taxableAmount * item.gstPercentage) / 100;
+
+    return acc + itemGst;
+  }, 0);
+
+  const subtotalAmount = selectedProducts.reduce((acc, item) => {
+    const basePrice = (item.costPrice * 100) / (100 + item.gstPercentage);
+    const baseTotal = basePrice * item.quantity;
+    const discountAmount = item.discountType === "percentage"
+      ? (baseTotal * (item.discount || 0)) / 100
+      : (item.discount || 0) * item.quantity;
+
+    return acc + (baseTotal - discountAmount);
+  }, 0);
+
+
+
+  const totalprice = subtotalAmount + totalGSTAmount;
+
+  
+  const finalAmountSubtotal = selectedProducts.reduce((acc, item) => {
+    const itemTotal = item.costPrice * item.quantity;
+    const discountAmount = item.discountType === "percentage"
+      ? (itemTotal * (item.discount || 0)) / 100
+      : (item.discount || 0) * item.quantity;
+  
+    return acc + (itemTotal - discountAmount);
+  }, 0);
 
   const gstItems = selectedProducts.filter((item) => item.gstPercentage > 0); // Exclude non-GST items
 
@@ -79,14 +130,15 @@ const PurcheseInvoice = () => {
   const halfGstAmount = totalGSTAmount / 2;
 
   const paidImageUri = require("../../assets/paid.png");
-  const unpaidImageUri =require("../../assets/unpaid.png");
+  const unpaidImageUri = require("../../assets/unpaid.png");
 
   const shareInvoice = async () => {
     try {
       const filePath = await PurchesePdfGenerate(
         billNumber, date, selectedCustomer, selectedProducts,
         totalBasePrice, totalGSTAmount, totalAmount, paymentMethod,
-        halfGSTPercentage, halfGstAmount, totalprice,customerData,prefix
+        halfGSTPercentage, halfGstAmount, totalprice, customerData, prefix,
+        calculateDiscountAmount, hasDiscount, totalDiscountAmount, subtotalAmount
       );
 
       if (filePath) {
@@ -145,7 +197,7 @@ const PurcheseInvoice = () => {
             </View>
             <View>
               <View>
-              <Image source={paymentMethod === "Cash" || paymentMethod === "Online" ? paidImageUri : unpaidImageUri} style={styles.imageStyle} />
+                <Image source={paymentMethod === "Cash" || paymentMethod === "Online" ? paidImageUri : unpaidImageUri} style={styles.imageStyle} />
               </View>
             </View>
           </View>
@@ -155,20 +207,41 @@ const PurcheseInvoice = () => {
             <Text style={styles.tableHeaderText}>Item</Text>
             <Text style={styles.tableHeaderText}>Qty</Text>
             <Text style={styles.tableHeaderText}>Price</Text>
+            {hasDiscount && <Text style={styles.tableHeaderText}>Discount</Text>}
             <Text style={styles.tableHeaderText}>GST%</Text>
             <Text style={styles.tableHeaderText}>Total</Text>
           </View>
 
           {selectedProducts.map((item, index) => {
             const basePrice = (item.costPrice * 100) / (100 + item.gstPercentage); // Price excluding GST
+            const discountAmount =
+              item.discountType === "percentage"
+                ? ((basePrice * item.quantity) * (item.discount || 0)) / 100
+                : (item.discount || 0) * item.quantity;
+
+            const discountedBasePrice = (basePrice * item.quantity - discountAmount).toFixed(2);
             return (
               <View key={index} style={styles.tableRow}>
                 <Text style={styles.tableText}>{index + 1}</Text>
                 <Text style={styles.tableText}>{item.name}</Text>
                 <Text style={styles.tableText}>{item.quantity}</Text>
-                <Text style={styles.tableText}>{basePrice.toFixed(2)}</Text>
+                <Text style={styles.tableText}>{discountedBasePrice}</Text>
+                {hasDiscount && (
+                  <Text style={styles.tableText}>
+                    {item.discountType === "percentage"
+                      ? `${item.discount}% = ₹${calculateDiscountAmount(item).toFixed(2)}`
+                      : `₹${calculateDiscountAmount(item).toFixed(2)}`}
+                  </Text>
+                )}
                 <Text style={styles.tableText}>{((item.costPrice - basePrice) * item.quantity).toFixed(2)}</Text>
-                <Text style={styles.tableText}>{(item.costPrice * item.quantity).toFixed(2)}</Text>
+                <Text style={styles.tableText}>
+                  {(
+                    item.costPrice * item.quantity -
+                    (item.discountType === "percentage"
+                      ? (item.costPrice * item.quantity * (item.discount || 0)) / 100
+                      : (item.discount || 0) * item.quantity)
+                  ).toFixed(2)}
+                </Text>
               </View>
             );
           })}
@@ -180,9 +253,14 @@ const PurcheseInvoice = () => {
             <Text style={[styles.tableText, styles.boldText]}>
               {selectedProducts.reduce((acc, item) => acc + item.quantity, 0)}
             </Text>
-            <Text style={[styles.tableText, styles.boldText]}>{(totalBasePrice).toFixed(2)}</Text>
+            <Text style={[styles.tableText, styles.boldText]}>{(subtotalAmount).toFixed(2)}</Text>
+            {hasDiscount && (
+              <Text style={[styles.tableText, styles.boldText]}>
+                {totalDiscountAmount.toFixed(2)}
+              </Text>
+            )}
             <Text style={[styles.tableText, styles.boldText]}>{(totalGSTAmount).toFixed(2)}</Text>
-            <Text style={[styles.tableText, styles.boldText]}>{totalprice.toFixed(2)}</Text>
+            <Text style={[styles.tableText, styles.boldText]}>{finalAmountSubtotal.toFixed(2)}</Text>
           </View>
 
           <View style={styles.tableHeader}>
@@ -193,19 +271,19 @@ const PurcheseInvoice = () => {
 
           <View style={styles.tableRow}>
             <Text style={styles.tableText}>CGST</Text>
-            <Text style={styles.tableText}>{totalBasePrice.toFixed(2)}</Text>
+            <Text style={styles.tableText}>{subtotalAmount.toFixed(2)}</Text>
             <Text style={styles.tableText}>{halfGstAmount.toFixed(2)}</Text>
           </View>
 
           <View style={styles.tableRow}>
             <Text style={styles.tableText}>SGST</Text>
-            <Text style={styles.tableText}>{totalBasePrice.toFixed(2)}</Text>
+            <Text style={styles.tableText}>{subtotalAmount.toFixed(2)}</Text>
             <Text style={styles.tableText}>{halfGstAmount.toFixed(2)}</Text>
           </View>
 
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>total Amount:  </Text>
-            <Text style={styles.summaryValue}>₹{totalprice.toFixed(2)} </Text>
+            <Text style={styles.summaryValue}>₹{finalAmountSubtotal.toFixed(2)} </Text>
           </View>
         </View>
       </ScrollView>

@@ -1,12 +1,10 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import RNHTMLtoPDF from "react-native-html-to-pdf";
 import RNFS from "react-native-fs";
-import { Image } from "react-native";
-
 export const generatePDF = async (
-  billNumber, date, selectedCustomer, selectedProducts, 
-  totalBasePrice, totalGSTAmount, totalAmount, paymentMethod, 
-  halfGSTPercentage, halfGstAmount, totalprice,customerData,prefix
+  billNumber, date, selectedCustomer, selectedProducts,
+  totalBasePrice, totalGSTAmount, totalAmount, paymentMethod,
+  halfGSTPercentage, halfGstAmount, totalprice, customerData, prefix,
+  calculateDiscountAmount, hasDiscount, totalDiscountAmount, subtotalAmount
 ) => {
 
   const safeProducts = Array.isArray(selectedProducts) ? selectedProducts : [];
@@ -14,17 +12,25 @@ export const generatePDF = async (
   const safeTotalGSTAmount = typeof totalGSTAmount === "number" ? totalGSTAmount : 0;
   const safeTotalPrice = typeof totalprice === "number" ? totalprice : 0;
 
-  
+  const finalAmountSubtotal = selectedProducts.reduce((acc, item) => {
+    const itemTotal = item.price * item.quantity;
+    const discountAmount = item.discountType === "percentage"
+      ? (itemTotal * (item.discount || 0)) / 100
+      : (item.discount || 0) * item.quantity;
+
+    return acc + (itemTotal - discountAmount);
+  }, 0);
+
   const paidImageUrl = "https://res.cloudinary.com/dpbx63xbs/image/upload/v1743071474/b1gxpxky2f6our77uwj6.png";
   const unpaidImageUrl = "https://res.cloudinary.com/dpbx63xbs/image/upload/v1743071474/xraxi7glabfbmqjj9xus.png";
-  
+
   const selectedImageBase64 = paymentMethod === "Cash" || paymentMethod === "Online"
     ? paidImageUrl
     : unpaidImageUrl
-  
+
 
   try {
-    
+
     const htmlContent = `
       <html>
         <head>
@@ -165,32 +171,51 @@ export const generatePDF = async (
             <th>Item</th>
             <th>Qty</th>
             <th>Price</th>
+            ${hasDiscount ? "<th>Discount</th>" : ""}
             <th>GST%</th>
             <th>Total</th>
           </tr>
-  ${safeProducts
+          ${safeProducts
         .map((item, index) => {
-          const basePrice = (item.price * 100) / (100 + item.gstPercentage);
+          const basePrice = (item.price * 100) / (100 + item.gstPercentage); // Price excluding GST
+          const discountAmount =
+            item.discountType === "percentage"
+              ? ((basePrice * item.quantity) * (item.discount || 0)) / 100
+              : (item.discount || 0) * item.quantity;
+
+          const discountedBasePrice = (basePrice * item.quantity - discountAmount).toFixed(2);
+
           return `
-        <tr>
-          <td>${index + 1}</td>
-          <td>${item.name}</td>
-          <td>${item.quantity}</td>
-          <td>${basePrice.toFixed(2)}</td>
-         <td>${((item.price - basePrice) * item.quantity).toFixed(2)}%</td>
-          <td>${(item.price * item.quantity).toFixed(2)}</td>
-        </tr>
-      `;
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${item.name}</td>
+                  <td>${item.quantity}</td>
+                  <td>${discountedBasePrice}</td>
+                  ${hasDiscount
+              ? `<td>${discountAmount.toFixed(2)}</td>`
+              : ""
+            }
+                  <td>${((item.price - basePrice) * item.quantity).toFixed(2)}</td>
+                  <td>${(
+              item.price * item.quantity -
+              (item.discountType === "percentage"
+                ? (item.price * item.quantity * (item.discount || 0)) / 100
+                : (item.discount || 0) * item.quantity)
+            ).toFixed(2)}</td>
+                </tr>
+              `;
         })
         .join("")}
+          
   
   <!-- Subtotal Row -->
   <tr style="background-color: #E5E5E5; font-weight: bold;">
     <td colspan="2" style="text-align: center;">Subtotal</td>
     <td>${safeProducts.reduce((sum, item) => sum + item.quantity, 0)}</td>
-    <td>${safeTotalBasePrice.toFixed(2)}</td>
+    <td>${subtotalAmount.toFixed(2)}</td>
+    ${hasDiscount ? `<td>${totalDiscountAmount.toFixed(2)}</td>` : ""}
     <td>${safeTotalGSTAmount.toFixed(2)}</td>
-    <td>${safeTotalPrice.toFixed(2)}</td>
+    <td>${finalAmountSubtotal.toFixed(2)}</td>
   </tr>
 </table>
 
@@ -203,17 +228,17 @@ export const generatePDF = async (
               </tr>
               <tr>
                 <td>CGST</td>
-                <td>${safeTotalBasePrice.toFixed(2)}</td>
+                <td>${subtotalAmount.toFixed(2)}</td>
                 <td>${halfGstAmount.toFixed(2)}</td>
               </tr>
               <tr>
                 <td>SGST</td>
-                <td>${safeTotalBasePrice.toFixed(2)}</td>
+                <td>${subtotalAmount.toFixed(2)}</td>
                 <td>${halfGstAmount.toFixed(2)}</td>
               </tr>
             </table>
             <div class="total-Price">
-            <p class="total-amount">Total Amount -  ${safeTotalPrice.toFixed(2)}</p>
+            <p class="total-amount">Total Amount -  ${finalAmountSubtotal.toFixed(2)}</p>
             </div>
           </div>
         </body>

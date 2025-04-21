@@ -10,7 +10,7 @@ import ProductServiceModal from "./ProductServiceTab";
 const UpdateSaleBill = () => {
   const route = useRoute();
   const { saleBillData } = route.params as { saleBillData: any };
-  console.log("saleBillData",saleBillData)
+  console.log("saleBillData", saleBillData)
   const navigation = useNavigation();
   const [billNumber, setBillNumber] = useState(1);
   const [date, setDate] = useState(new Date());
@@ -22,70 +22,70 @@ const UpdateSaleBill = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<any>("");
   const [isSaving, setIsSaving] = useState(false);
 
- useEffect(() => {
-  if (saleBillData && Object.keys(saleBillData).length > 0) {
-    setBillNumber(saleBillData.BillNumber || "1");
-    setDate(saleBillData.Date ? new Date(saleBillData.Date) : new Date());
+  useEffect(() => {
+    if (saleBillData && Object.keys(saleBillData).length > 0) {
+      setBillNumber(saleBillData.BillNumber || "1");
+      setDate(saleBillData.Date ? new Date(saleBillData.Date) : new Date());
 
-    // Extract products from `items` array
-    const formattedItems = Array.isArray(saleBillData.items)
-      ? saleBillData.items.map((item) => ({
+      // Extract products from `items` array
+      const formattedItems = Array.isArray(saleBillData.items)
+        ? saleBillData.items.map((item) => ({
           name: item.productName || item.productId?.name || "Unnamed Product",
           quantity: item.quantity || 1,
           price: item.price || 0,
           productId: item.productId?._id || "",
           isService: false, // Mark as a product
         }))
-      : [];
+        : [];
 
-    // Extract services from `services` array
-    const formattedServices = Array.isArray(saleBillData.services)
-      ? saleBillData.services.map((service) => ({
+      // Extract services from `services` array
+      const formattedServices = Array.isArray(saleBillData.services)
+        ? saleBillData.services.map((service) => ({
           name: service.serviceName || service.serviceId?.serviceName || "Unnamed Service",
           quantity: service.quantity || 1,
           price: service.price || 0,
           serviceId: service.serviceId?._id || service._id || "",
           isService: true, // Mark as a service
         }))
-      : [];
+        : [];
 
-    // Merge both lists (products + services)
-    setSelectedProducts([...formattedItems, ...formattedServices]);
+      // Merge both lists (products + services)
+      setSelectedProducts([...formattedItems, ...formattedServices]);
 
-    setPaymentMethod(saleBillData.paymentStatus || "Cash");
-    setSelectedCustomer(saleBillData.customerId || "");
-  }
-}, [saleBillData]);
+      setPaymentMethod(saleBillData.paymentStatus || "Cash");
+      setSelectedCustomer(saleBillData.customerId || "");
+    }
+  }, [saleBillData]);
 
-  
+
 
   const totalAmount = selectedProducts.reduce((total, item) => total + item.quantity * item.price, 0);
   const billId = saleBillData._id;
 
   const updateBill = async () => {
     setIsSaving(true);
-  
+
     if (!billId) {
       showToast("error", "Error", "Invalid Bill ID. Unable to update.");
       setIsSaving(false);
       return;
     }
-  
+
     if (!selectedCustomer || !selectedCustomer._id) {
       showToast("error", "Error", "Please select a customer.");
       setIsSaving(false);
       return;
     }
-  
+
     if (selectedProducts.length === 0) {
       showToast("error", "Error", "Please select at least one product or service.");
       setIsSaving(false);
       return;
     }
-  
+
     // Format date before sending
     const formattedDate = date.toISOString().split("T")[0]; // Converts to "YYYY-MM-DD"
-  
+
     // **Separate products and services**
     const items = selectedProducts
       .filter((item) => item.productId) // Only products
@@ -94,7 +94,7 @@ const UpdateSaleBill = () => {
         quantity: item.quantity,
         price: item.price,
       }));
-  
+
     const services = selectedProducts
       .filter((item) => item.serviceId) // Only services
       .map((service) => ({
@@ -102,7 +102,7 @@ const UpdateSaleBill = () => {
         quantity: service.quantity,
         price: service.price,
       }));
-  
+
     const billData = {
       billNumber,
       date: formattedDate,
@@ -111,7 +111,7 @@ const UpdateSaleBill = () => {
       services, // Services array
       paymentStatus: paymentMethod,
     };
-  
+
     try {
       await UpdateBillById(billData, billId);
       showToast("success", "Success", "Bill updated successfully!");
@@ -131,7 +131,7 @@ const UpdateSaleBill = () => {
       setIsSaving(false);
     }
   };
-  
+
 
 
 
@@ -141,11 +141,11 @@ const UpdateSaleBill = () => {
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 5 }}>
           <View>
             <Text style={{ fontSize: 14 }}>Sale Bill No:    </Text>
-            <Text style={{ fontSize: 12, fontWeight: "bold", borderWidth: 1, padding: 8,borderColor:"#D0DDD0" }}>{billNumber}</Text>
+            <Text style={{ fontSize: 12, fontWeight: "bold", borderWidth: 1, padding: 8, borderColor: "#D0DDD0" }}>{billNumber}</Text>
           </View>
           <View>
             <Text style={{ fontSize: 14 }}>Select Date:</Text>
-            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, padding: 8 ,borderColor:"#D0DDD0"}}>
+            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, padding: 8, borderColor: "#D0DDD0" }}>
               <Text style={{ fontSize: 12, marginLeft: 5 }}>{date.toDateString()}</Text>
             </TouchableOpacity>
           </View>
@@ -153,20 +153,20 @@ const UpdateSaleBill = () => {
 
         {showDatePicker && (
           <DateTimePicker value={date} mode="date" display="default" onChange={(event, selectedDate) => {
-            setShowDatePicker(false); 
+            setShowDatePicker(false);
             if (selectedDate) setDate(selectedDate);
           }} />
         )}
 
         <Text style={{ fontSize: 14, marginTop: 10 }}>Bill To:</Text>
-        <TouchableOpacity onPress={() => setCustomerModalVisible(true)} style={{ borderWidth: 1, padding: 10, marginTop: 5, borderRadius: 5,borderColor:"#D0DDD0" }}>
+        <TouchableOpacity onPress={() => setCustomerModalVisible(true)} style={{ borderWidth: 1, padding: 10, marginTop: 5, borderRadius: 5, borderColor: "#D0DDD0" }}>
           <Text style={{ fontSize: 14 }}>{selectedCustomer?.name || "Select a Customer"}</Text>
           <Text style={{ fontSize: 12 }}>{selectedCustomer?.phone || "Select a Customer"}</Text>
         </TouchableOpacity>
 
         <Text style={{ fontSize: 14, marginTop: 10 }}>Items:</Text>
         <TouchableOpacity onPress={() => setModalVisible(true)}
-          >
+        >
           {selectedProducts.length > 0 ? (
             selectedProducts.map((item, index) => (
               <View key={index} style={styles.selectedProductBox}>
@@ -190,22 +190,22 @@ const UpdateSaleBill = () => {
         </View>
       </View>
       <View style={styles.bottomButtonContainer}>
-              <TouchableOpacity
-                style={[styles.actionButton, isSaving && { backgroundColor: "#999" }]}
-                onPress={updateBill}
-                disabled={isSaving} // Disable when saving
-              >
-                {isSaving ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Text style={{ color: "white", fontSize: 12 }}>Updated Bill    </Text>
-                )}
-              </TouchableOpacity>
-            </View>
+        <TouchableOpacity
+          style={[styles.actionButton, isSaving && { backgroundColor: "#999" }]}
+          onPress={updateBill}
+          disabled={isSaving} // Disable when saving
+        >
+          {isSaving ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={{ color: "white", fontSize: 12 }}>Updated Bill    </Text>
+          )}
+        </TouchableOpacity>
+      </View>
       <ProductServiceModal visible={modalVisible} onClose={() => setModalVisible(false)}
-       selectedProducts={selectedProducts} 
-       onSelect={(products) => setSelectedProducts(products)}
-       />
+        selectedProducts={selectedProducts}
+        onSelect={(products) => setSelectedProducts(products)}
+      />
     </>
   );
 };
@@ -215,12 +215,12 @@ const styles = StyleSheet.create({
   productName: { fontSize: 12, fontWeight: "bold", color: "#333" },
   productDetails: { fontSize: 12, color: "#555" },
   productPrice: { fontSize: 14, fontWeight: "bold", color: "#007AFF" },
-  totalContainer: { flexDirection: "row", justifyContent: "space-between", marginTop: 30, padding: 10,borderColor: "#D0DDD0", borderWidth: 1 },
+  totalContainer: { flexDirection: "row", justifyContent: "space-between", marginTop: 30, padding: 10, borderColor: "#D0DDD0", borderWidth: 1 },
   totalText: { fontSize: 14, fontWeight: "bold" },
   totalAmount: { fontSize: 14, fontWeight: "bold", color: "green" },
-  actionButton: { backgroundColor: "#007AFF", padding: 8, borderRadius: 5, alignItems: "center",fontSize:12 },
+  actionButton: { backgroundColor: "#007AFF", padding: 8, borderRadius: 5, alignItems: "center", fontSize: 12 },
   bottomButtonContainer: {
-    marginHorizontal:20,
+    marginHorizontal: 20,
     bottom: 20,
     paddingVertical: 10,
     borderRadius: 5,
